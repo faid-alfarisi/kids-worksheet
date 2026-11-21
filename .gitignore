@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Bahan referensi mentah (besar)
+referensi/
+
+# Native (CNG)
+/android
+/ios
