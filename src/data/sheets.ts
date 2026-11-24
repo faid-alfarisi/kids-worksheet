@@ -5,20 +5,6 @@
 export type Sheet = { image: number; thumb: number; w: number; h: number };
 
 export const SHEETS: Record<string, Sheet[]> = {
-  berhitung: [
-    { image: require('../../assets/worksheets/berhitung/01.jpg'), thumb: require('../../assets/worksheets/berhitung/01_t.jpg'), w: 940, h: 1332 },
-    { image: require('../../assets/worksheets/berhitung/02.jpg'), thumb: require('../../assets/worksheets/berhitung/02_t.jpg'), w: 736, h: 1045 },
-    { image: require('../../assets/worksheets/berhitung/03.jpg'), thumb: require('../../assets/worksheets/berhitung/03_t.jpg'), w: 764, h: 1080 },
-    { image: require('../../assets/worksheets/berhitung/04.jpg'), thumb: require('../../assets/worksheets/berhitung/04_t.jpg'), w: 764, h: 1080 },
-    { image: require('../../assets/worksheets/berhitung/05.jpg'), thumb: require('../../assets/worksheets/berhitung/05_t.jpg'), w: 764, h: 1080 },
-    { image: require('../../assets/worksheets/berhitung/06.jpg'), thumb: require('../../assets/worksheets/berhitung/06_t.jpg'), w: 764, h: 1080 },
-    { image: require('../../assets/worksheets/berhitung/07.jpg'), thumb: require('../../assets/worksheets/berhitung/07_t.jpg'), w: 466, h: 659 },
-    { image: require('../../assets/worksheets/berhitung/08.jpg'), thumb: require('../../assets/worksheets/berhitung/08_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/berhitung/09.jpg'), thumb: require('../../assets/worksheets/berhitung/09_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/berhitung/10.jpg'), thumb: require('../../assets/worksheets/berhitung/10_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/berhitung/11.jpg'), thumb: require('../../assets/worksheets/berhitung/11_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/berhitung/12.jpg'), thumb: require('../../assets/worksheets/berhitung/12_t.jpg'), w: 1080, h: 1528 },
-  ],
   menggaris: [
     { image: require('../../assets/worksheets/menggaris/01.jpg'), thumb: require('../../assets/worksheets/menggaris/01_t.jpg'), w: 1080, h: 1528 },
     { image: require('../../assets/worksheets/menggaris/02.jpg'), thumb: require('../../assets/worksheets/menggaris/02_t.jpg'), w: 1080, h: 1528 },

@@ -27,7 +27,8 @@ const PAIRS: [ShapeKind, ShapeKind][] = [
 ];
 
 const ROWS = 4;
-const MODES: MatchMode[] = ['pasangan', 'bayangan', 'warna', 'hitung'];
+// Mode untuk menu Memasangkan. Mode 'hitung' (benda ↔ angka) dipakai di menu Berhitung.
+const MODES: MatchMode[] = ['pasangan', 'bayangan', 'warna'];
 
 const pick = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -108,7 +109,13 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
 
 /** Soal acak: mode, isi, dan urutan kolom kanan semuanya diacak. */
 export function randomRound(previous?: MatchMode): MatchRound {
-  const mode = pick(MODES.filter((m) => m !== previous));
+  return buildRound(pick(MODES.filter((m) => m !== previous)));
+}
+
+/** Soal pasangkan jumlah benda dengan angkanya (untuk menu Berhitung). */
+export const randomCountMatchRound = () => buildRound('hitung');
+
+function buildRound(mode: MatchMode): MatchRound {
   const { prompt, pairs } = makePairs(mode);
   const order = shuffle(pairs.map((_, i) => i)); // order[i] = posisi kanan untuk pasangan ke-i
   const right: MatchItem[] = [];

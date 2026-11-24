@@ -8,14 +8,14 @@ export type Category = {
   color: string;
   soft: string;
   /** Kategori permainan acak: langsung buka layar ini, bukan daftar lembar soal. */
-  route?: '/cari-jalan' | '/memasangkan' | '/perbandingan' | '/coding' | '/mewarnai' | '/menulis' | '/menggambar' | '/menggaris';
+  route?: '/cari-jalan' | '/memasangkan' | '/perbandingan' | '/coding' | '/mewarnai' | '/menulis' | '/menggambar' | '/menggaris' | '/berhitung';
 };
 
 export const CATEGORIES: Category[] = [
   { id: 'carijalan', title: 'Cari Jalan', subtitle: 'Atur arah robot sampai ke bintang', emoji: '🤖', color: '#7C4DFF', soft: '#EDE7FF', route: '/cari-jalan' },
   { id: 'coding', title: 'Coding', subtitle: 'Warnai sesuai kode angka', emoji: '🧠', color: '#3949AB', soft: '#E6E9F8', route: '/coding' },
-  { id: 'berhitung', title: 'Berhitung', subtitle: 'Hitung benda & penjumlahan', emoji: '🔢', color: '#FF7043', soft: '#FFE9E2' },
-  { id: 'memasangkan', title: 'Memasangkan', subtitle: 'Warna, bayangan, pasangan & hitung', emoji: '🧩', color: '#26A69A', soft: '#DFF5F2', route: '/memasangkan' },
+  { id: 'berhitung', title: 'Berhitung', subtitle: 'Hitung, tambah & kurang', emoji: '🔢', color: '#FF7043', soft: '#FFE9E2', route: '/berhitung' },
+  { id: 'memasangkan', title: 'Memasangkan', subtitle: 'Warna, bayangan & pasangan', emoji: '🧩', color: '#26A69A', soft: '#DFF5F2', route: '/memasangkan' },
   { id: 'menggaris', title: 'Menggaris', subtitle: 'Lurus, gelombang, zigzag & maze', emoji: '✏️', color: '#42A5F5', soft: '#E3F2FD', route: '/menggaris' },
   { id: 'mewarnai', title: 'Mewarnai', subtitle: 'Warnai gambar sesukamu', emoji: '🖍️', color: '#EC407A', soft: '#FCE4EC', route: '/mewarnai' },
   { id: 'melengkapi', title: 'Melengkapi', subtitle: 'Lengkapi separuh gambar hewan', emoji: '🦁', color: '#FFA000', soft: '#FFF3D6' },

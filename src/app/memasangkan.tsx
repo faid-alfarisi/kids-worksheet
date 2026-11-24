@@ -4,7 +4,7 @@ import { MatchGame } from '../components/MatchGame';
 import { getCategory } from '../data/categories';
 import { randomRound } from '../data/match';
 
-/** Memasangkan: soal acak (warna, bayangan, pasangan, hitung) dengan tarik garis. */
+/** Memasangkan: soal acak (warna, bayangan, pasangan) dengan tarik garis. */
 export default function MemasangkanScreen() {
   const cat = getCategory('memasangkan')!;
   const [state, setState] = useState(() => ({ id: 0, round: randomRound() }));
