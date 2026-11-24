@@ -1,10 +1,16 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Category } from '../data/categories';
 
-/** Kerangka layar permainan acak: header berwarna, isi, dan tombol acak di bawah. */
+/** Kembali ke beranda; kalau layar dibuka langsung (tanpa riwayat), ganti dengan beranda. */
+function goHome() {
+  if (router.canDismiss()) router.dismissTo('/');
+  else router.replace('/');
+}
+
+/** Kerangka layar permainan acak: header berwarna, isi, dan tombol Home + Acak di bawah. */
 export function GameScreen({ cat, shuffleLabel, onShuffle, children }: { cat: Category; shuffleLabel: string; onShuffle: () => void; children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
@@ -19,6 +25,13 @@ export function GameScreen({ cat, shuffleLabel, onShuffle, children }: { cat: Ca
       />
       <View style={styles.content}>{children}</View>
       <View style={[styles.bar, { paddingBottom: 10 + insets.bottom }]}>
+        <Pressable
+          onPress={goHome}
+          accessibilityLabel="Kembali ke beranda"
+          style={({ pressed }) => [styles.home, { borderColor: cat.color }, pressed && { opacity: 0.7 }]}
+        >
+          <Text style={styles.homeText}>🏠</Text>
+        </Pressable>
         <Pressable onPress={onShuffle} style={({ pressed }) => [styles.shuffle, { backgroundColor: cat.color }, pressed && { opacity: 0.8 }]}>
           <Text style={styles.shuffleText}>🔀 {shuffleLabel}</Text>
         </Pressable>
@@ -29,7 +42,9 @@ export function GameScreen({ cat, shuffleLabel, onShuffle, children }: { cat: Ca
 
 const styles = StyleSheet.create({
   content: { flex: 1 },
-  bar: { paddingHorizontal: 12, paddingTop: 10, backgroundColor: '#fff' },
-  shuffle: { paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
+  bar: { flexDirection: 'row', gap: 10, paddingHorizontal: 12, paddingTop: 10, backgroundColor: '#fff' },
+  home: { width: 56, borderRadius: 14, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  homeText: { fontSize: 24 },
+  shuffle: { flex: 1, paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
   shuffleText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { GestureResponderEvent, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import type { MatchItem, MatchRound } from '../data/match';
-import { ColorDot, Shape } from './shapes';
+import { ColorDot, Shape } from '../shapes';
 
 type Side = 'L' | 'R';
 type Drag = { side: Side; row: number; x: number; y: number };
@@ -176,7 +176,7 @@ function ItemView({ item, size, boxW, rowH }: { item: MatchItem; size: number; b
       return (
         <View style={[styles.group, { width: s * perLine }]}>
           {Array.from({ length: item.count }, (_, k) => (
-            <Shape key={k} kind={item.kind} color={item.color} size={s} />
+            <Shape key={k} kind={item.kind} size={s} />
           ))}
         </View>
       );

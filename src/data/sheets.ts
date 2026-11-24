@@ -47,14 +47,6 @@ export const SHEETS: Record<string, Sheet[]> = {
     { image: require('../../assets/worksheets/melengkapi/04.jpg'), thumb: require('../../assets/worksheets/melengkapi/04_t.jpg'), w: 1080, h: 1528 },
     { image: require('../../assets/worksheets/melengkapi/05.jpg'), thumb: require('../../assets/worksheets/melengkapi/05_t.jpg'), w: 1080, h: 1528 },
   ],
-  perbandingan: [
-    { image: require('../../assets/worksheets/perbandingan/01.jpg'), thumb: require('../../assets/worksheets/perbandingan/01_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/perbandingan/02.jpg'), thumb: require('../../assets/worksheets/perbandingan/02_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/perbandingan/03.jpg'), thumb: require('../../assets/worksheets/perbandingan/03_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/perbandingan/04.jpg'), thumb: require('../../assets/worksheets/perbandingan/04_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/perbandingan/05.jpg'), thumb: require('../../assets/worksheets/perbandingan/05_t.jpg'), w: 1080, h: 1530 },
-    { image: require('../../assets/worksheets/perbandingan/06.jpg'), thumb: require('../../assets/worksheets/perbandingan/06_t.jpg'), w: 1080, h: 1528 },
-  ],
   menulis: [
     { image: require('../../assets/worksheets/menulis/01.jpg'), thumb: require('../../assets/worksheets/menulis/01_t.jpg'), w: 764, h: 1080 },
     { image: require('../../assets/worksheets/menulis/02.jpg'), thumb: require('../../assets/worksheets/menulis/02_t.jpg'), w: 465, h: 660 },

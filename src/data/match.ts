@@ -1,9 +1,9 @@
-import { SHAPE_KINDS, SHAPE_NAMES, type ShapeKind } from '../components/shapes';
+import { RECOLOR_KINDS, SHAPE_KINDS, shapeDef, type ShapeKind } from '../shapes';
 
 /** Isi satu kotak di kolom kiri/kanan. */
 export type MatchItem =
-  | { type: 'shape'; kind: ShapeKind; color: string; silhouette?: boolean }
-  | { type: 'group'; kind: ShapeKind; color: string; count: number }
+  | { type: 'shape'; kind: ShapeKind; color?: string; silhouette?: boolean }
+  | { type: 'group'; kind: ShapeKind; count: number }
   | { type: 'dot'; color: string }
   | { type: 'number'; value: number };
 
@@ -42,6 +42,22 @@ function shuffle<T>(arr: readonly T[]): T[] {
 
 const sample = <T,>(arr: readonly T[], n: number) => shuffle(arr).slice(0, n);
 
+/** Ambil shape acak berbeda; dari tiap grup bayangan mirip (`look`) maksimal satu. */
+function sampleDistinctShapes(n: number): ShapeKind[] {
+  const out: ShapeKind[] = [];
+  const looks = new Set<string>();
+  for (const k of shuffle(SHAPE_KINDS)) {
+    const look = shapeDef(k).look;
+    if (look) {
+      if (looks.has(look)) continue;
+      looks.add(look);
+    }
+    out.push(k);
+    if (out.length === n) break;
+  }
+  return out;
+}
+
 /** Buat pasangan kiri-kanan sesuai mode. */
 function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchItem][] } {
   switch (mode) {
@@ -49,7 +65,7 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
       const [a, b] = pick(PAIRS);
       const colors = sample(MATCH_COLORS, ROWS);
       return {
-        prompt: `Pasangkan ${SHAPE_NAMES[a]} dengan ${SHAPE_NAMES[b]} yang warnanya sama!`,
+        prompt: `Pasangkan ${shapeDef(a).name} dengan ${shapeDef(b).name} yang warnanya sama!`,
         pairs: colors.map((color) => [
           { type: 'shape', kind: a, color },
           { type: 'shape', kind: b, color },
@@ -57,20 +73,16 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
       };
     }
     case 'bayangan': {
-      const kinds = sample(SHAPE_KINDS, ROWS);
       return {
         prompt: 'Tarik garis ke bayangan yang cocok!',
-        pairs: kinds.map((kind) => {
-          const color = pick(MATCH_COLORS);
-          return [
-            { type: 'shape', kind, color },
-            { type: 'shape', kind, color, silhouette: true },
-          ];
-        }),
+        pairs: sampleDistinctShapes(ROWS).map((kind) => [
+          { type: 'shape', kind },
+          { type: 'shape', kind, silhouette: true },
+        ]),
       };
     }
     case 'warna': {
-      const kinds = sample(SHAPE_KINDS, ROWS);
+      const kinds = sample(RECOLOR_KINDS, ROWS);
       const colors = sample(MATCH_COLORS, ROWS);
       return {
         prompt: 'Tarik garis ke warna yang sama!',
@@ -82,11 +94,11 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
     }
     case 'hitung': {
       const counts = sample([1, 2, 3, 4, 5, 6], ROWS);
-      const kinds = sample(SHAPE_KINDS.filter((k) => k !== 'celana' && k !== 'rumah'), ROWS);
+      const kinds = sample(SHAPE_KINDS.filter((k) => k !== 'rumah'), ROWS);
       return {
         prompt: 'Hitung bendanya, lalu tarik garis ke angkanya!',
         pairs: counts.map((count, i) => [
-          { type: 'group', kind: kinds[i], color: pick(MATCH_COLORS), count },
+          { type: 'group', kind: kinds[i], count },
           { type: 'number', value: count },
         ]),
       };
