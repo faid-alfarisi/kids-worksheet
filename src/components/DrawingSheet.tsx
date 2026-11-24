@@ -3,14 +3,23 @@ import { useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import type { Sheet } from '../data/sheets';
+import { DrawingArt, type DrawingDef } from '../drawings';
 
-const CRAYONS = ['#E53935', '#FB8C00', '#FDD835', '#43A047', '#1E88E5', '#8E24AA', '#6D4C41', '#212121'];
-const SIZES = [4, 8, 16];
+// Dua baris krayon: warna cerah di atas, warna lembut/netral di bawah (putih bisa jadi penghapus).
+const CRAYON_ROWS = [
+  ['#E53935', '#FB8C00', '#FDD835', '#C0CA33', '#43A047', '#26C6DA', '#1E88E5', '#8E24AA'],
+  ['#EC407A', '#F8BBD0', '#FFCC80', '#A1887F', '#6D4C41', '#9E9E9E', '#212121', '#FFFFFF'],
+];
+const CRAYONS = CRAYON_ROWS.flat();
+const SIZES = [5, 12, 24];
 
 type Stroke = { d: string; color: string; width: number };
 
-/** Lembar soal + kanvas coret-coret di atasnya (pakai jari). */
-export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: string }) {
+/**
+ * Kanvas coret-coret (pakai jari) di atas lembar soal (`sheet`, gambar) atau gambar besar (`art`, drawing).
+ * Untuk drawing, garis tepinya digambar DI ATAS coretan supaya garis tetap rapi saat diwarnai.
+ */
+export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art?: DrawingDef; color: string }) {
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
@@ -56,7 +65,7 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
   );
 
   // Ukuran gambar menyesuaikan ruang yang ada (contain), kanvas persis di atas gambar.
-  const ratio = sheet.w / sheet.h;
+  const ratio = art || !sheet ? 1 : sheet.w / sheet.h;
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     const w = Math.min(width - 16, (height - 16) * ratio);
@@ -68,7 +77,11 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
       <View style={styles.stage} onLayout={onLayout}>
         {box.w > 0 && (
           <View style={[styles.paper, { width: box.w, height: box.h }]}>
-            <Image source={sheet.image} style={StyleSheet.absoluteFill} contentFit="contain" />
+            {art ? (
+              <DrawingArt def={art} size={box.w} layer="fill" />
+            ) : (
+              sheet && <Image source={sheet.image} style={StyleSheet.absoluteFill} contentFit="contain" />
+            )}
             <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
               {/* pointerEvents none: sentuhan selalu jatuh ke View induk, jadi locationX/Y konsisten */}
               <Svg width={box.w} height={box.h} pointerEvents="none">
@@ -80,16 +93,27 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
                 )}
               </Svg>
             </View>
+            {art && (
+              <View style={StyleSheet.absoluteFill} pointerEvents="none">
+                <DrawingArt def={art} size={box.w} layer="line" />
+              </View>
+            )}
           </View>
         )}
       </View>
 
       <View style={styles.toolbar}>
-        <View style={styles.colors}>
-          {CRAYONS.map((c) => (
-            <Pressable key={c} onPress={() => pickCrayon(c)} style={[styles.dot, { backgroundColor: c }, crayon === c && styles.dotActive]} />
-          ))}
-        </View>
+        {CRAYON_ROWS.map((row) => (
+          <View key={row[0]} style={styles.colors}>
+            {row.map((c) => (
+              <Pressable
+                key={c}
+                onPress={() => pickCrayon(c)}
+                style={[styles.dot, { backgroundColor: c }, c === '#FFFFFF' && styles.dotWhite, crayon === c && styles.dotActive]}
+              />
+            ))}
+          </View>
+        ))}
         <View style={styles.actions}>
           {SIZES.map((s) => (
             <Pressable key={s} onPress={() => pickSize(s)} style={[styles.sizeBtn, size === s && { borderColor: accent }]}>
@@ -120,6 +144,7 @@ const styles = StyleSheet.create({
   toolbar: { backgroundColor: '#fff', paddingHorizontal: 12, paddingTop: 10, gap: 8, borderTopWidth: 1, borderColor: '#eee' },
   colors: { flexDirection: 'row', justifyContent: 'space-between' },
   dot: { width: 34, height: 34, borderRadius: 17, borderWidth: 3, borderColor: '#fff' },
+  dotWhite: { borderColor: '#DDD' },
   dotActive: { borderColor: '#333', transform: [{ scale: 1.15 }] },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sizeBtn: { width: 38, height: 38, borderRadius: 12, borderWidth: 2, borderColor: '#eee', alignItems: 'center', justifyContent: 'center' },

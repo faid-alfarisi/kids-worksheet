@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { type CodeRound } from '../data/colorcode';
+import { type CodeRound, roundNumbers } from '../data/colorcode';
+import { DRAWING_SIZE, DrawingArt, type DrawingDef, DRAWINGS, hitRegion } from '../drawings';
 import { Shape, shapeDef, type ShapeKind } from '../shapes';
 
 const WRONG_MS = 700;
 const BLANK = '#FFFFFF';
 
 /**
- * Coding kode warna: legenda angka→warna di atas, benda berangka di tengah, pilihan warna di bawah.
+ * Coding kode warna: legenda angka→warna di atas, benda/gambar berangka di tengah, pilihan warna di bawah.
  * Pilih warna lalu tap benda. Benar → warna menempel, angka hilang.
  * Salah → "tet tot": angka jadi ✕ merah sebentar (benda bergoyang), lalu kembali jadi angka.
  */
@@ -23,7 +24,8 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  const done = Object.keys(painted).length === round.items.length;
+  const numbers = roundNumbers(round);
+  const done = Object.keys(painted).length === numbers.length;
 
   const flash = (fn: () => void) => {
     if (timer.current) clearTimeout(timer.current);
@@ -37,7 +39,7 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
       flash(() => setHint(false));
       return;
     }
-    if (round.items[i].number === picked + 1) {
+    if (numbers[i] === picked + 1) {
       setPainted((p) => ({ ...p, [i]: true }));
       setWrong(null);
     } else {
@@ -48,7 +50,7 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
 
   const onLayout = (e: LayoutChangeEvent) => setArea({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height });
   const cols = 2;
-  const rows = Math.ceil(round.items.length / cols);
+  const rows = Math.ceil(numbers.length / cols);
   const size = Math.min(area.w / cols, area.h / rows) * 0.82;
 
   return (
@@ -67,7 +69,18 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
       <View style={[styles.board, { borderColor: accent }]}>
         {/* Diukur di dalam border supaya 2 kolom pas. */}
         <View style={styles.grid} onLayout={onLayout}>
+        {area.w > 0 && round.type === 'drawing' && (
+          <DrawingBoard
+            def={DRAWINGS[round.id]}
+            size={Math.min(area.w, area.h) * 0.96}
+            fills={Object.fromEntries(Object.keys(painted).map((k) => [k, round.colors[numbers[+k] - 1].hex]))}
+            painted={painted}
+            wrong={wrong}
+            onTap={tapItem}
+          />
+        )}
         {area.w > 0 &&
+          round.type === 'shapes' &&
           round.items.map((item, i) => (
             <View key={i} style={[styles.cell, { width: area.w / cols, height: area.h / rows }]}>
               <CodeItem
@@ -113,6 +126,40 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
   );
 }
 
+/** Gambar besar berangka; bagian yang disentuh dicari dengan hit test poligon. */
+function DrawingBoard({
+  def,
+  size,
+  fills,
+  painted,
+  wrong,
+  onTap,
+}: {
+  def: DrawingDef;
+  size: number;
+  fills: Record<number, string>;
+  painted: Record<number, boolean>;
+  wrong: number | null;
+  onTap: (i: number) => void;
+}) {
+  const labels = Object.fromEntries(
+    def.regions.map((r, i) => [i, painted[i] ? null : { text: wrong === i ? '✕' : String(r.n), wrong: wrong === i }]),
+  );
+  return (
+    <View
+      style={[styles.drawing, { width: size, height: size }]}
+      onStartShouldSetResponder={() => true}
+      onResponderRelease={(e) => {
+        const { locationX: x, locationY: y } = e.nativeEvent;
+        const i = hitRegion(def, [(x / size) * DRAWING_SIZE, (y / size) * DRAWING_SIZE]);
+        if (i >= 0) onTap(i);
+      }}
+    >
+      <DrawingArt def={def} size={size} fills={fills} labels={labels} />
+    </View>
+  );
+}
+
 /** Satu benda berangka. Bergoyang sebentar saat jawaban salah. */
 function CodeItem({ kind, number, fill, wrong, size, onPress }: { kind: ShapeKind; number: number; fill: string | null; wrong: boolean; size: number; onPress: () => void }) {
   const [shake] = useState(() => new Animated.Value(0));
@@ -151,7 +198,8 @@ const styles = StyleSheet.create({
   legendDot: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: '#3A3A3A', alignItems: 'center', justifyContent: 'center' },
   legendNum: { fontSize: 24, fontWeight: '900', color: '#fff', textShadowColor: '#000', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
   board: { flex: 1, backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, overflow: 'hidden' },
-  grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap' },
+  grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' },
+  drawing: { alignSelf: 'center' },
   cell: { alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   badgeText: { fontWeight: '900', color: '#37474F', includeFontPadding: false },

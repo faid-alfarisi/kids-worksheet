@@ -1,9 +1,10 @@
 import { Stack } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { DrawingArt, DRAWINGS } from '../drawings';
 import { Shape, SHAPE_GROUPS, type ShapeKind } from '../shapes';
 
 /**
- * Katalog semua shape (untuk pengembang, tidak ada di menu).
+ * Katalog semua shape & gambar besar (untuk pengembang, tidak ada di menu).
  * Buka lewat: kidsworksheet://katalog-shape
  */
 export default function KatalogShape() {
@@ -11,6 +12,17 @@ export default function KatalogShape() {
     <>
       <Stack.Screen options={{ title: 'Katalog Shape' }} />
       <ScrollView contentContainerStyle={styles.wrap}>
+        <View style={styles.group}>
+          <Text style={styles.title}>Gambar besar (drawing)</Text>
+          <View style={styles.grid}>
+            {Object.entries(DRAWINGS).map(([id, def]) => (
+              <View key={id} style={styles.item}>
+                <DrawingArt def={def} size={160} labels={Object.fromEntries(def.regions.map((r, i) => [i, { text: String(r.n) }]))} />
+                <Text style={styles.label}>{id}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
         {Object.entries(SHAPE_GROUPS).map(([group, shapes]) => (
           <View key={group} style={styles.group}>
             <Text style={styles.title}>{group}</Text>

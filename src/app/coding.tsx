@@ -8,7 +8,7 @@ import { randomCodeRound } from '../data/colorcode';
 export default function CodingScreen() {
   const cat = getCategory('coding')!;
   const [state, setState] = useState(() => ({ id: 0, round: randomCodeRound() }));
-  const shuffle = () => setState((s) => ({ id: s.id + 1, round: randomCodeRound() }));
+  const shuffle = () => setState((s) => ({ id: s.id + 1, round: randomCodeRound(s.round) }));
 
   return (
     <GameScreen cat={cat} shuffleLabel="Acak Soal Baru" onShuffle={shuffle}>
