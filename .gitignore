@@ -46,3 +46,8 @@ referensi/
 # Native (CNG)
 /android
 /ios
+
+# Kunci tanda tangan APK (jangan pernah di-commit)
+*.keystore
+release.jks
+keystore.b64

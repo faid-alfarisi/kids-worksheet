@@ -18,6 +18,13 @@
 
 ---
 
+## 📲 Unduh
+
+APK terbaru selalu ada di halaman **[Releases](https://github.com/faid-alfarisi/kids-worksheet/releases/latest)**,
+dibuat otomatis setiap ada perubahan di branch `main`. Unduh file `.apk` di HP Android, buka, lalu izinkan
+"pasang dari sumber tidak dikenal" kalau diminta. Butuh HP Android 64-bit (arm64), yaitu hampir semua HP
+beberapa tahun terakhir.
+
 ## ✨ Fitur
 
 Begitu dibuka, aplikasi langsung menampilkan daftar kategori. Tap kategori → langsung main.
@@ -87,16 +94,16 @@ adb reverse tcp:8081 tcp:8081   # kalau HP tidak bisa terhubung ke Metro
 > **Windows:** kalau Gradle gagal karena versi Java, arahkan `JAVA_HOME` ke JDK Android Studio:
 > `$env:JAVA_HOME="C:\Program Files\Android\Android Studio\jbr"` (PowerShell).
 
-### Build APK release (bisa dimainkan tanpa komputer)
+### Build APK release di komputer sendiri
 
 ```bash
 npx expo prebuild --platform android   # hanya perlu kalau app.json / aset native berubah
-cd android && ./gradlew assembleRelease
+cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 # hasil: android/app/build/outputs/apk/release/app-release.apk
 ```
 
-APK ini ditandatangani dengan *debug keystore*, cocok untuk dipasang sendiri.
-Untuk Play Store, siapkan keystore sendiri atau pakai [EAS Build](https://docs.expo.dev/build/introduction/).
+APK hasil build lokal ditandatangani dengan *debug keystore*, cocok untuk dicoba sendiri.
+APK resmi untuk dibagikan dibuat otomatis oleh GitHub Actions (lihat bagian berikut).
 
 ### Cek kode
 
@@ -104,6 +111,42 @@ Untuk Play Store, siapkan keystore sendiri atau pakai [EAS Build](https://docs.e
 npx tsc --noEmit   # typecheck
 npx expo lint      # lint
 ```
+
+## 🤖 Rilis otomatis (GitHub Actions)
+
+Workflow [`.github/workflows/release-apk.yml`](.github/workflows/release-apk.yml) berjalan setiap ada push
+ke `main` (atau manual dari tab **Actions**). Workflow ini:
+
+1. menginstal dependensi, menjalankan `expo prebuild`, lalu build APK release **khusus arm64**;
+2. memberi nomor versi otomatis `1.0.<nomor build>` (lihat `app.config.ts`);
+3. menandatangani APK dengan **keystore tetap** dari GitHub Secrets;
+4. menerbitkan GitHub Release `v1.0.<nomor build>` dengan APK terlampir.
+
+Gunakan branch lain (mis. `dev`) untuk pengembangan, dan merge ke `main` kalau ingin merilis APK baru.
+
+### Menyiapkan keystore (sekali saja)
+
+Keystore harus **tetap sama** untuk semua rilis. Kalau berganti, HP pengguna tidak bisa meng-update aplikasi
+dan harus uninstall dulu. Jalankan di komputer sendiri (`keytool` ikut terpasang bersama JDK / Android Studio):
+
+```bash
+keytool -genkeypair -v -keystore release.jks -alias kidsworksheet   -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Isi password dan data yang diminta. Lalu ubah keystore menjadi teks base64 dan simpan di GitHub Secrets
+(**Settings → Secrets and variables → Actions → New repository secret**), atau pakai `gh`:
+
+```bash
+base64 -w0 release.jks > keystore.b64          # PowerShell: [Convert]::ToBase64String([IO.File]::ReadAllBytes("release.jks")) | Set-Content keystore.b64
+gh secret set ANDROID_KEYSTORE_BASE64 < keystore.b64
+gh secret set ANDROID_KEYSTORE_PASSWORD        # diminta mengetik password keystore
+gh secret set ANDROID_KEY_ALIAS --body kidsworksheet
+gh secret set ANDROID_KEY_PASSWORD             # password key (biasanya sama dengan password keystore)
+```
+
+> ⚠️ **Simpan `release.jks` dan password-nya baik-baik di luar repo** (mis. password manager atau cloud
+> pribadi). Jangan pernah meng-commit-nya; `*.jks` dan `keystore.b64` sudah ada di `.gitignore`.
+> Kalau keystore hilang, rilis berikutnya tidak bisa meng-update aplikasi yang sudah terpasang.
 
 ## 🎨 Menambah konten
 
@@ -122,6 +165,12 @@ buka katalog pengembang di HP:
 ```bash
 adb shell am start -a android.intent.action.VIEW -d "kidsworksheet://katalog-shape"
 ```
+
+## 🙏 Sumber gambar
+
+Hampir semua konten digambar dengan kode oleh proyek ini. Beberapa lembar kerja (Melengkapi, Menggaris,
+Mewarnai) berasal dari situs lembar kerja gratis seperti LembarBelajar.com dan LembarKerja.com, dan
+watermark aslinya tetap dibiarkan. Daftar lengkapnya ada di **[CREDITS.md](CREDITS.md)**.
 
 ## 📦 Info aplikasi
 
