@@ -17,7 +17,27 @@ export const OUTLINE = '#3A3A3A';
 export const SHADOW = '#262626';
 export const DARK = '#333';
 
-export type Paint = { fill: string; stroke: string; strokeWidth: number; strokeLinejoin: 'round' };
+export type Paint = { fill: string; stroke: string; strokeWidth: number; strokeLinejoin: 'round'; strokeDasharray?: string };
+
+/** Warna & pola garis putus-putus untuk mode "tebalkan gambar". */
+export const TRACE_COLOR = '#90A4AE';
+const TRACE_DASH = '3.5 3';
+
+export const TRACE_PAINT: Paint = { fill: '#fff', stroke: TRACE_COLOR, strokeWidth: 1.4, strokeLinejoin: 'round', strokeDasharray: TRACE_DASH };
+
+/**
+ * Mode gambar yang sedang aktif. Diset oleh <Shape> tepat sebelum memanggil `draw()` (sinkron),
+ * supaya `part()` dan `stroke()` ikut menggambar garis putus-putus tanpa mengubah tiap shape.
+ */
+let traceMode = false;
+export function drawTraced<T>(fn: () => T): T {
+  traceMode = true;
+  try {
+    return fn();
+  } finally {
+    traceMode = false;
+  }
+}
 
 export type ShapeDef = {
   /** Nama dalam bahasa Indonesia, untuk teks soal. */
@@ -39,18 +59,17 @@ export type ShapeDef = {
   draw: (p: Paint, sil: boolean) => ReactNode;
 };
 
-/** Cat untuk bagian berwarna tetap; jadi hitam saat bayangan. */
-export const part = (fill: string, sil: boolean): Paint => ({
-  fill: sil ? SHADOW : fill,
-  stroke: sil ? SHADOW : OUTLINE,
-  strokeWidth: 3,
-  strokeLinejoin: 'round',
-});
+/** Cat untuk bagian berwarna tetap; jadi hitam saat bayangan, putus-putus saat mode tebalkan. */
+export const part = (fill: string, sil: boolean): Paint =>
+  traceMode
+    ? TRACE_PAINT
+    : { fill: sil ? SHADOW : fill, stroke: sil ? SHADOW : OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' };
 
 /** Garis/tangkai tanpa isi. */
 export const stroke = (color: string, sil: boolean, width = 3) => ({
-  stroke: sil ? SHADOW : color,
-  strokeWidth: width,
+  stroke: traceMode ? TRACE_COLOR : sil ? SHADOW : color,
+  strokeWidth: traceMode ? TRACE_PAINT.strokeWidth : width,
+  strokeDasharray: traceMode ? TRACE_DASH : undefined,
   strokeLinecap: 'round' as const,
   fill: 'none',
 });

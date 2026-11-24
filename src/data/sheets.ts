@@ -40,20 +40,4 @@ export const SHEETS: Record<string, Sheet[]> = {
     { image: require('../../assets/worksheets/melengkapi/04.jpg'), thumb: require('../../assets/worksheets/melengkapi/04_t.jpg'), w: 1080, h: 1528 },
     { image: require('../../assets/worksheets/melengkapi/05.jpg'), thumb: require('../../assets/worksheets/melengkapi/05_t.jpg'), w: 1080, h: 1528 },
   ],
-  membaca: [
-    { image: require('../../assets/worksheets/membaca/01.jpg'), thumb: require('../../assets/worksheets/membaca/01_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/membaca/02.jpg'), thumb: require('../../assets/worksheets/membaca/02_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/membaca/03.jpg'), thumb: require('../../assets/worksheets/membaca/03_t.jpg'), w: 1080, h: 1528 },
-    { image: require('../../assets/worksheets/membaca/04.jpg'), thumb: require('../../assets/worksheets/membaca/04_t.jpg'), w: 1080, h: 810 },
-  ],
-  menggambar: [
-    { image: require('../../assets/worksheets/menggambar/01.jpg'), thumb: require('../../assets/worksheets/menggambar/01_t.jpg'), w: 549, h: 575 },
-    { image: require('../../assets/worksheets/menggambar/02.jpg'), thumb: require('../../assets/worksheets/menggambar/02_t.jpg'), w: 547, h: 589 },
-    { image: require('../../assets/worksheets/menggambar/03.jpg'), thumb: require('../../assets/worksheets/menggambar/03_t.jpg'), w: 554, h: 555 },
-    { image: require('../../assets/worksheets/menggambar/04.jpg'), thumb: require('../../assets/worksheets/menggambar/04_t.jpg'), w: 544, h: 583 },
-    { image: require('../../assets/worksheets/menggambar/05.jpg'), thumb: require('../../assets/worksheets/menggambar/05_t.jpg'), w: 549, h: 610 },
-    { image: require('../../assets/worksheets/menggambar/06.jpg'), thumb: require('../../assets/worksheets/menggambar/06_t.jpg'), w: 551, h: 588 },
-    { image: require('../../assets/worksheets/menggambar/07.jpg'), thumb: require('../../assets/worksheets/menggambar/07_t.jpg'), w: 548, h: 573 },
-    { image: require('../../assets/worksheets/menggambar/08.jpg'), thumb: require('../../assets/worksheets/menggambar/08_t.jpg'), w: 548, h: 545 },
-  ],
 };

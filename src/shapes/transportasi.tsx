@@ -1,11 +1,11 @@
 import { Circle, Path, Rect } from 'react-native-svg';
-import { DARK, OUTLINE, part, SHADOW, type ShapeDef, stroke } from './kit';
+import { DARK, OUTLINE, part, type ShapeDef, stroke } from './kit';
 
 const GLASS = '#E3F2FD';
 
 const wheel = (x: number, y: number, r: number, sil: boolean) => (
   <>
-    <Circle cx={x} cy={y} r={r} fill={sil ? SHADOW : DARK} />
+    <Circle {...part(DARK, sil)} cx={x} cy={y} r={r} />
     {!sil && <Circle cx={x} cy={y} r={r * 0.42} fill="#BDBDBD" />}
   </>
 );

@@ -24,24 +24,27 @@ export type CustomPage = { ratio: number; render: (w: number, h: number) => Reac
  *  - `art`: gambar besar (drawing); garis tepinya digambar DI ATAS coretan supaya tetap rapi,
  *  - `page`: halaman buatan sendiri (mis. lembar menulis).
  * `ink` = satu warna tetap (pemilih warna disembunyikan), mis. hitam untuk menulis.
+ * `startColor` = warna awal krayon (pemilih warna tetap tampil).
  */
 export function DrawingSheet({
   sheet,
   art,
   page,
   ink,
+  startColor,
   color: accent,
 }: {
   sheet?: Sheet;
   art?: DrawingDef;
   page?: CustomPage;
   ink?: string;
+  startColor?: string;
   color: string;
 }) {
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
-  const [crayon, setCrayon] = useState(ink ?? CRAYONS[0]);
+  const [crayon, setCrayon] = useState(ink ?? startColor ?? CRAYONS[0]);
   const [size, setSize] = useState(SIZES[1]);
 
   // Warna/ukuran aktif juga disimpan di ref (diubah di handler tombol) agar PanResponder yang dibuat sekali selalu memakai nilai terbaru.

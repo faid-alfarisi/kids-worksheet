@@ -1,5 +1,5 @@
 import { Circle, G, Path, Rect } from 'react-native-svg';
-import { DARK, OUTLINE, part, SHADOW, type ShapeDef } from './kit';
+import { DARK, OUTLINE, part, type ShapeDef, stroke } from './kit';
 
 /** Peralatan sekolah. */
 export const SEKOLAH = {
@@ -15,7 +15,7 @@ export const SEKOLAH = {
         <Rect {...part('#B0BEC5', sil)} x={16} y={40} width={8} height={20} />
         <Rect {...p} x={24} y={40} width={50} height={20} />
         <Path {...part('#FFE0B2', sil)} d="M74 40 L94 50 L74 60 Z" />
-        <Path d="M87 46.5 L94 50 L87 53.5 Z" fill={sil ? SHADOW : DARK} />
+        <Path {...part(DARK, sil)} d="M87 46.5 L94 50 L87 53.5 Z" />
         {!sil && <Path d="M24 50 H74" stroke={OUTLINE} strokeWidth={1.5} opacity={0.5} />}
       </G>
     ),
@@ -56,7 +56,7 @@ export const SEKOLAH = {
     recolor: true,
     draw: (p, sil) => (
       <>
-        <Path d="M38 26 Q38 8 50 8 Q62 8 62 26" stroke={sil ? SHADOW : OUTLINE} strokeWidth={6} fill="none" />
+        <Path d="M38 26 Q38 8 50 8 Q62 8 62 26" {...stroke(OUTLINE, sil, 6)} />
         <Rect {...p} x={18} y={22} width={64} height={72} rx={18} />
         {!sil && <Rect x={28} y={56} width={44} height={28} rx={9} fill="#fff" opacity={0.45} stroke={OUTLINE} strokeWidth={2.5} />}
         {!sil && <Path d="M28 66 H72" stroke={OUTLINE} strokeWidth={2} />}

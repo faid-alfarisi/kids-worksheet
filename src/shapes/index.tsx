@@ -2,7 +2,7 @@ import Svg, { Circle, Ellipse } from 'react-native-svg';
 import { BUAH } from './buah';
 import { DINOSAURUS } from './dinosaurus';
 import { HEWAN } from './hewan';
-import { OUTLINE, SHADOW, type ShapeDef } from './kit';
+import { drawTraced, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
 import { LAINNYA } from './lainnya';
 import { SAYUR } from './sayur';
 import { SEKOLAH } from './sekolah';
@@ -45,9 +45,31 @@ export const CODE_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).code
 
 export const shapeDef = (kind: ShapeKind): ShapeDef => SHAPES[kind];
 
-/** Gambar satu shape. Tanpa `color` → warna aslinya. `silhouette` → bayangan hitam polos. */
-export function Shape({ kind, color, size, silhouette = false }: { kind: ShapeKind; color?: string; size: number; silhouette?: boolean }) {
+/**
+ * Gambar satu shape. Tanpa `color` → warna aslinya. `silhouette` → bayangan hitam polos.
+ * `trace` → hanya garis putus-putus berisi putih (untuk ditebalkan), tanpa detail kecil.
+ */
+export function Shape({
+  kind,
+  color,
+  size,
+  silhouette = false,
+  trace = false,
+}: {
+  kind: ShapeKind;
+  color?: string;
+  size: number;
+  silhouette?: boolean;
+  trace?: boolean;
+}) {
   const def = shapeDef(kind);
+  if (trace) {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 100 100">
+        {drawTraced(() => def.draw(TRACE_PAINT, true))}
+      </Svg>
+    );
+  }
   const paint = {
     fill: silhouette ? SHADOW : (color ?? def.color),
     stroke: silhouette ? SHADOW : OUTLINE,

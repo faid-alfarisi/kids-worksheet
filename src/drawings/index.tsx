@@ -34,6 +34,7 @@ type Label = { text: string; wrong?: boolean };
  * - layer "fill": bagian putih saja (alas untuk dicoret).
  * - layer "line": garis tepi + hiasan saja (ditaruh di atas coretan supaya garis tetap rapi).
  * - layer "all" (default): warna + garis + hiasan + angka (untuk Coding).
+ * - layer "trace": isi putih + garis tepi putus-putus saja (untuk ditebalkan di Menggambar).
  */
 export function DrawingArt({
   def,
@@ -44,10 +45,17 @@ export function DrawingArt({
 }: {
   def: DrawingDef;
   size: number;
-  layer?: 'all' | 'fill' | 'line';
+  layer?: 'all' | 'fill' | 'line' | 'trace';
   fills?: Record<number, string>;
   labels?: Record<number, Label | null>;
 }) {
+  if (layer === 'trace') {
+    return (
+      <Svg width={size} height={size} viewBox={`0 0 ${SIZE} ${SIZE}`} pointerEvents="none">
+        <Path d={visibleOutline(def)} fill="none" stroke="#90A4AE" strokeWidth={2.2} strokeDasharray="6 5" strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    );
+  }
   const showFill = layer !== 'line';
   const showLine = layer !== 'fill';
   return (

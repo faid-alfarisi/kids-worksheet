@@ -1,5 +1,5 @@
 import { Circle, Ellipse, Path } from 'react-native-svg';
-import { DARK, eye, face, OUTLINE, part, SHADOW, type ShapeDef, smile, stroke } from './kit';
+import { DARK, eye, face, OUTLINE, part, type ShapeDef, smile, stroke } from './kit';
 
 export const HEWAN = {
   kucing: {
@@ -48,7 +48,7 @@ export const HEWAN = {
         <Ellipse {...p} cx={33} cy={69} rx={16} ry={15} />
         <Ellipse {...p} cx={67} cy={69} rx={16} ry={15} />
         {!sil && [[27, 36, 7], [73, 36, 7], [33, 70, 5], [67, 70, 5]].map(([x, y, r]) => <Circle key={`${x}${y}`} cx={x} cy={y} r={r} fill="#fff" opacity={0.6} />)}
-        <Ellipse cx={50} cy={52} rx={7} ry={30} fill={sil ? SHADOW : '#5D4037'} />
+        <Ellipse {...part('#5D4037', sil)} cx={50} cy={52} rx={7} ry={30} />
         {!sil && eye(47, 32, 2.2)}
         {!sil && eye(53, 32, 2.2)}
       </>
