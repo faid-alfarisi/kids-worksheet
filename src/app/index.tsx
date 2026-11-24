@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { CATEGORIES, countItems } from '../data/categories';
+import { CATEGORIES } from '../data/categories';
 
 export default function Home() {
   return (
@@ -22,10 +22,6 @@ export default function Home() {
           <View style={styles.body}>
             <Text style={[styles.title, { color: item.color }]}>{item.title}</Text>
             <Text style={styles.subtitle}>{item.subtitle}</Text>
-          </View>
-          <View style={[styles.count, { backgroundColor: item.color }]}>
-            <Text style={styles.countText}>{item.route ? '🔀' : countItems(item.id)}</Text>
-            <Text style={styles.countLabel}>{item.route ? 'acak' : 'soal'}</Text>
           </View>
         </Pressable>
       )}
@@ -50,7 +46,4 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   title: { fontSize: 22, fontWeight: '900' },
   subtitle: { fontSize: 14, color: '#555', marginTop: 2 },
-  count: { borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6, alignItems: 'center', minWidth: 52 },
-  countText: { color: '#fff', fontSize: 18, fontWeight: '900' },
-  countLabel: { color: '#fff', fontSize: 11, fontWeight: '700' },
 });
