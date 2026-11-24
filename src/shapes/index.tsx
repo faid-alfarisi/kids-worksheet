@@ -40,6 +40,9 @@ export const SHAPE_KINDS = Object.keys(SHAPES) as ShapeKind[];
 /** Shape yang boleh diwarnai bebas (untuk soal warna). */
 export const RECOLOR_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).recolor);
 
+/** Shape yang punya letak angka (untuk soal Coding/kode warna). */
+export const CODE_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).code);
+
 export const shapeDef = (kind: ShapeKind): ShapeDef => SHAPES[kind];
 
 /** Gambar satu shape. Tanpa `color` → warna aslinya. `silhouette` → bayangan hitam polos. */

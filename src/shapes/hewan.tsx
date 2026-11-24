@@ -7,6 +7,7 @@ export const HEWAN = {
     color: '#FFB74D',
     look: 'telinga',
     recolor: true,
+    code: { x: 50, y: 37 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M20 42 L24 10 L44 28 Q50 27 56 28 L76 10 L80 42 Q88 58 80 74 Q68 90 50 90 Q32 90 20 74 Q12 58 20 42 Z" />
@@ -22,6 +23,7 @@ export const HEWAN = {
     name: 'ikan',
     color: '#29B6F6',
     recolor: true,
+    code: { x: 42, y: 61 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M70 50 L94 30 L90 50 L94 70 Z" />
@@ -37,6 +39,7 @@ export const HEWAN = {
     name: 'kupu-kupu',
     color: '#AB47BC',
     recolor: true,
+    code: { x: 28, y: 40 },
     draw: (p, sil) => (
       <>
         <Path d="M46 26 Q40 12 32 10 M54 26 Q60 12 68 10" {...stroke(DARK, sil)} />

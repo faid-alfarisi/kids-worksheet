@@ -15,6 +15,7 @@ export const TRANSPORTASI = {
     name: 'mobil',
     color: '#EF5350',
     recolor: true,
+    code: { x: 50, y: 58 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M8 64 L12 48 Q15 41 24 40 L34 26 Q38 22 45 22 H62 Q68 22 72 28 L80 40 Q91 42 93 54 L93 66 Q93 72 87 72 H13 Q8 72 8 64 Z" />
@@ -30,6 +31,7 @@ export const TRANSPORTASI = {
     name: 'bus',
     color: '#FFCA28',
     recolor: true,
+    code: { x: 50, y: 66 },
     draw: (p, sil) => (
       <>
         <Rect {...p} x={6} y={20} width={88} height={54} rx={10} />
@@ -45,6 +47,7 @@ export const TRANSPORTASI = {
     name: 'pesawat',
     color: '#42A5F5',
     recolor: true,
+    code: { x: 18, y: 50 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M46 46 L30 14 H42 L64 46 Z" />
@@ -60,6 +63,7 @@ export const TRANSPORTASI = {
     name: 'kapal',
     color: '#EF5350',
     recolor: true,
+    code: { x: 50, y: 70 },
     draw: (p, sil) => (
       <>
         <Rect {...part('#424242', sil)} x={56} y={20} width={12} height={22} />

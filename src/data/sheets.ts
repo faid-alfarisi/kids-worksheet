@@ -5,13 +5,6 @@
 export type Sheet = { image: number; thumb: number; w: number; h: number };
 
 export const SHEETS: Record<string, Sheet[]> = {
-  coding: [
-    { image: require('../../assets/worksheets/coding/01.jpg'), thumb: require('../../assets/worksheets/coding/01_t.jpg'), w: 466, h: 658 },
-    { image: require('../../assets/worksheets/coding/02.jpg'), thumb: require('../../assets/worksheets/coding/02_t.jpg'), w: 466, h: 659 },
-    { image: require('../../assets/worksheets/coding/03.jpg'), thumb: require('../../assets/worksheets/coding/03_t.jpg'), w: 393, h: 508 },
-    { image: require('../../assets/worksheets/coding/04.jpg'), thumb: require('../../assets/worksheets/coding/04_t.jpg'), w: 465, h: 659 },
-    { image: require('../../assets/worksheets/coding/05.jpg'), thumb: require('../../assets/worksheets/coding/05_t.jpg'), w: 387, h: 516 },
-  ],
   berhitung: [
     { image: require('../../assets/worksheets/berhitung/01.jpg'), thumb: require('../../assets/worksheets/berhitung/01_t.jpg'), w: 940, h: 1332 },
     { image: require('../../assets/worksheets/berhitung/02.jpg'), thumb: require('../../assets/worksheets/berhitung/02_t.jpg'), w: 736, h: 1045 },

@@ -31,6 +31,11 @@ export type ShapeDef = {
    * supaya tidak muncul bersamaan di soal bayangan.
    */
   look?: string;
+  /**
+   * Letak angka (kanvas 100x100) di bagian utama shape, untuk soal Coding (kode warna).
+   * Hanya shape yang punya `code` yang dipakai di Coding.
+   */
+  code?: { x: number; y: number };
   draw: (p: Paint, sil: boolean) => ReactNode;
 };
 

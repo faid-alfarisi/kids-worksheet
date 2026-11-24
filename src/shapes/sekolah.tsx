@@ -8,6 +8,7 @@ export const SEKOLAH = {
     color: '#FFCA28',
     look: 'batang',
     recolor: true,
+    code: { x: 49, y: 51 },
     draw: (p, sil) => (
       <G transform="rotate(-40 50 50)">
         <Rect {...part('#F48FB1', sil)} x={4} y={40} width={14} height={20} rx={4} />
@@ -37,6 +38,7 @@ export const SEKOLAH = {
     name: 'buku',
     color: '#29B6F6',
     recolor: true,
+    code: { x: 54, y: 62 },
     draw: (p, sil) => (
       <>
         <Path {...part('#FFFFFF', sil)} d="M22 80 H82 V92 H22 Q16 92 16 86 Q16 80 22 80 Z" />

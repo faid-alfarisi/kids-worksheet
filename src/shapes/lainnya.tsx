@@ -14,6 +14,7 @@ export const LAINNYA = {
     name: 'baju',
     color: '#42A5F5',
     recolor: true,
+    code: { x: 50, y: 62 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M34 14 Q50 27 66 14 L91 30 L81 47 L71 41 L71 89 L29 89 L29 41 L19 47 L9 30 Z" />
@@ -26,6 +27,7 @@ export const LAINNYA = {
     name: 'celana',
     color: '#5C6BC0',
     recolor: true,
+    code: { x: 50, y: 34 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M23 11 H77 L83 91 H58 L50 45 L42 91 H17 Z" />
@@ -38,6 +40,7 @@ export const LAINNYA = {
     name: 'garasi',
     color: '#EF5350',
     recolor: true,
+    code: { x: 20, y: 72 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M10 48 L50 12 L90 48 V90 H10 Z" />
@@ -52,6 +55,7 @@ export const LAINNYA = {
     color: '#F06292',
     look: 'pohon',
     recolor: true,
+    code: { x: 50, y: 19 },
     draw: (p, sil) => (
       <>
         <Path d="M50 60 V96" {...stroke('#43A047', sil, 6)} />
@@ -68,6 +72,7 @@ export const LAINNYA = {
     name: 'bintang',
     color: '#FFCA28',
     recolor: true,
+    code: { x: 50, y: 38 },
     draw: (p, sil) => (
       <>
         <Path {...p} d={STAR} />
@@ -79,6 +84,7 @@ export const LAINNYA = {
     name: 'hati',
     color: '#EF5350',
     recolor: true,
+    code: { x: 50, y: 75 },
     draw: (p, sil) => (
       <>
         <Path {...p} d="M50 90 C20 68 6 50 10 32 C14 15 38 10 50 28 C62 10 86 15 90 32 C94 50 80 68 50 90 Z" />
@@ -91,6 +97,7 @@ export const LAINNYA = {
     name: 'balon',
     color: '#AB47BC',
     recolor: true,
+    code: { x: 50, y: 44 },
     draw: (p, sil) => (
       <>
         <Path d="M50 78 Q42 86 52 92 Q58 96 50 99" {...stroke('#616161', sil, 2.5)} />
