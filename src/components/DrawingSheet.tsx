@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import type { Sheet } from '../data/sheets';
@@ -15,15 +15,33 @@ const SIZES = [5, 12, 24];
 
 type Stroke = { d: string; color: string; width: number };
 
+/** Halaman buatan sendiri: `render(lebar, tinggi)` menggambar latar dengan rasio lebar/tinggi `ratio`. */
+export type CustomPage = { ratio: number; render: (w: number, h: number) => ReactNode };
+
 /**
- * Kanvas coret-coret (pakai jari) di atas lembar soal (`sheet`, gambar) atau gambar besar (`art`, drawing).
- * Untuk drawing, garis tepinya digambar DI ATAS coretan supaya garis tetap rapi saat diwarnai.
+ * Kanvas coret-coret (pakai jari) di atas salah satu latar:
+ *  - `sheet`: lembar soal (gambar),
+ *  - `art`: gambar besar (drawing); garis tepinya digambar DI ATAS coretan supaya tetap rapi,
+ *  - `page`: halaman buatan sendiri (mis. lembar menulis).
+ * `ink` = satu warna tetap (pemilih warna disembunyikan), mis. hitam untuk menulis.
  */
-export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art?: DrawingDef; color: string }) {
+export function DrawingSheet({
+  sheet,
+  art,
+  page,
+  ink,
+  color: accent,
+}: {
+  sheet?: Sheet;
+  art?: DrawingDef;
+  page?: CustomPage;
+  ink?: string;
+  color: string;
+}) {
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
-  const [crayon, setCrayon] = useState(CRAYONS[0]);
+  const [crayon, setCrayon] = useState(ink ?? CRAYONS[0]);
   const [size, setSize] = useState(SIZES[1]);
 
   // Warna/ukuran aktif juga disimpan di ref (diubah di handler tombol) agar PanResponder yang dibuat sekali selalu memakai nilai terbaru.
@@ -65,7 +83,7 @@ export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art
   );
 
   // Ukuran gambar menyesuaikan ruang yang ada (contain), kanvas persis di atas gambar.
-  const ratio = art || !sheet ? 1 : sheet.w / sheet.h;
+  const ratio = page ? page.ratio : art || !sheet ? 1 : sheet.w / sheet.h;
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     const w = Math.min(width - 16, (height - 16) * ratio);
@@ -77,7 +95,9 @@ export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art
       <View style={styles.stage} onLayout={onLayout}>
         {box.w > 0 && (
           <View style={[styles.paper, { width: box.w, height: box.h }]}>
-            {art ? (
+            {page ? (
+              page.render(box.w, box.h)
+            ) : art ? (
               <DrawingArt def={art} size={box.w} layer="fill" />
             ) : (
               sheet && <Image source={sheet.image} style={StyleSheet.absoluteFill} contentFit="contain" />
@@ -103,7 +123,8 @@ export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art
       </View>
 
       <View style={styles.toolbar}>
-        {CRAYON_ROWS.map((row) => (
+        {!ink &&
+          CRAYON_ROWS.map((row) => (
           <View key={row[0]} style={styles.colors}>
             {row.map((c) => (
               <Pressable
@@ -113,7 +134,7 @@ export function DrawingSheet({ sheet, art, color: accent }: { sheet?: Sheet; art
               />
             ))}
           </View>
-        ))}
+          ))}
         <View style={styles.actions}>
           {SIZES.map((s) => (
             <Pressable key={s} onPress={() => pickSize(s)} style={[styles.sizeBtn, size === s && { borderColor: accent }]}>
