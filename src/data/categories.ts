@@ -1,5 +1,4 @@
 import { SHEETS } from './sheets';
-import { CODING_LEVELS } from './coding';
 
 export type Category = {
   id: string;
@@ -30,5 +29,4 @@ export const getCategory = (id: string) => CATEGORIES.find((c) => c.id === id);
 /** Kategori permainan robot (bukan lembar gambar). */
 export const MAZE_ID = 'carijalan';
 
-export const countItems = (id: string) =>
-  id === MAZE_ID ? CODING_LEVELS.length : (SHEETS[id]?.length ?? 0);
+export const countItems = (id: string) => SHEETS[id]?.length ?? 0;

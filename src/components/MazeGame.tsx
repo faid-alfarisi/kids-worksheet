@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ARROW, type Dir, type Level, MOVE, parseLevel, type Pos } from '../data/coding';
+import { ARROW, type Dir, type Level, MOVE, parseLevel, type Pos } from '../data/maze';
 
 type Status = 'edit' | 'running' | 'win' | 'fail';
 
@@ -10,7 +10,7 @@ const DIRS: Dir[] = ['left', 'up', 'down', 'right'];
  * Coding untuk anak: susun urutan panah, tekan "Jalankan", robot bergerak satu per satu.
  * Sampai di bintang = menang; menabrak batu/keluar papan = coba lagi.
  */
-export function CodingGame({ level, color, onNext }: { level: Level; color: string; onNext?: () => void }) {
+export function MazeGame({ level, color, onShuffle }: { level: Level; color: string; onShuffle: () => void }) {
   const info = useMemo(() => parseLevel(level), [level]);
   const maxCmds = info.shortest + 4;
   const [cmds, setCmds] = useState<Dir[]>([]);
@@ -91,11 +91,9 @@ export function CodingGame({ level, color, onNext }: { level: Level; color: stri
       {status === 'win' && (
         <View style={[styles.banner, { backgroundColor: '#E8F5E9' }]}>
           <Text style={styles.bannerText}>🎉 Hebat! Robot sampai ke bintang!</Text>
-          {onNext && (
-            <Pressable onPress={onNext} style={[styles.bigBtn, { backgroundColor: color }]}>
-              <Text style={styles.bigBtnText}>Level berikutnya ▶</Text>
-            </Pressable>
-          )}
+          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: color }]}>
+            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
+          </Pressable>
         </View>
       )}
       {status === 'fail' && (

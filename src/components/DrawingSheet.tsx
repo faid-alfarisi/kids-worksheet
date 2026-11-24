@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import type { Sheet } from '../data/sheets';
@@ -17,14 +17,22 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
   const [crayon, setCrayon] = useState(CRAYONS[0]);
   const [size, setSize] = useState(SIZES[1]);
 
-  // Simpan nilai terbaru di ref agar PanResponder (dibuat sekali) selalu memakai warna/ukuran aktif.
+  // Warna/ukuran aktif juga disimpan di ref (diubah di handler tombol) agar PanResponder yang dibuat sekali selalu memakai nilai terbaru.
   const pathRef = useRef('');
   const styleRef = useRef({ color: crayon, width: size });
-  styleRef.current = { color: crayon, width: size };
+  const pickCrayon = (c: string) => {
+    styleRef.current = { ...styleRef.current, color: c };
+    setCrayon(c);
+  };
+  const pickSize = (w: number) => {
+    styleRef.current = { ...styleRef.current, width: w };
+    setSize(w);
+  };
 
-  const pan = useMemo(
-    () =>
-      PanResponder.create({
+  // PanResponder hanya menyimpan callback; ref dibaca saat disentuh, bukan saat render.
+  // eslint-disable-next-line react-hooks/refs
+  const [pan] = useState(() =>
+    PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
         onPanResponderTerminationRequest: () => false,
@@ -45,7 +53,6 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
           setCurrent(null);
         },
       }),
-    [],
   );
 
   // Ukuran gambar menyesuaikan ruang yang ada (contain), kanvas persis di atas gambar.
@@ -80,12 +87,12 @@ export function DrawingSheet({ sheet, color: accent }: { sheet: Sheet; color: st
       <View style={styles.toolbar}>
         <View style={styles.colors}>
           {CRAYONS.map((c) => (
-            <Pressable key={c} onPress={() => setCrayon(c)} style={[styles.dot, { backgroundColor: c }, crayon === c && styles.dotActive]} />
+            <Pressable key={c} onPress={() => pickCrayon(c)} style={[styles.dot, { backgroundColor: c }, crayon === c && styles.dotActive]} />
           ))}
         </View>
         <View style={styles.actions}>
           {SIZES.map((s) => (
-            <Pressable key={s} onPress={() => setSize(s)} style={[styles.sizeBtn, size === s && { borderColor: accent }]}>
+            <Pressable key={s} onPress={() => pickSize(s)} style={[styles.sizeBtn, size === s && { borderColor: accent }]}>
               <View style={{ width: s + 4, height: s + 4, borderRadius: 20, backgroundColor: crayon }} />
             </Pressable>
           ))}

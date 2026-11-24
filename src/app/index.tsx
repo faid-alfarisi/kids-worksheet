@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { CATEGORIES, countItems } from '../data/categories';
+import { CATEGORIES, countItems, MAZE_ID } from '../data/categories';
 
 export default function Home() {
   return (
@@ -11,7 +11,9 @@ export default function Home() {
       ListHeaderComponent={<Text style={styles.hello}>Mau belajar apa hari ini? 👋</Text>}
       renderItem={({ item }) => (
         <Pressable
-          onPress={() => router.push({ pathname: '/kategori/[id]', params: { id: item.id } })}
+          onPress={() =>
+            item.id === MAZE_ID ? router.push('/cari-jalan') : router.push({ pathname: '/kategori/[id]', params: { id: item.id } })
+          }
           style={({ pressed }) => [styles.card, { backgroundColor: item.soft, borderColor: item.color }, pressed && styles.pressed]}
         >
           <View style={[styles.badge, { backgroundColor: item.color }]}>
@@ -22,8 +24,8 @@ export default function Home() {
             <Text style={styles.subtitle}>{item.subtitle}</Text>
           </View>
           <View style={[styles.count, { backgroundColor: item.color }]}>
-            <Text style={styles.countText}>{countItems(item.id)}</Text>
-            <Text style={styles.countLabel}>soal</Text>
+            <Text style={styles.countText}>{item.id === MAZE_ID ? '🔀' : countItems(item.id)}</Text>
+            <Text style={styles.countLabel}>{item.id === MAZE_ID ? 'acak' : 'soal'}</Text>
           </View>
         </Pressable>
       )}

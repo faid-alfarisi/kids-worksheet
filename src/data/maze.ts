@@ -1,17 +1,8 @@
-// Peta level coding. Simbol:
+// Peta permainan Cari Jalan (robot). Simbol:
 //   R = robot (start)   * = bintang (tujuan)   # = batu (tidak bisa dilewati)   . = jalan
 export type Dir = 'up' | 'down' | 'left' | 'right';
 
-export type Level = { title: string; map: string[] };
-
-export const CODING_LEVELS: Level[] = [
-  { title: 'Lurus Saja', map: ['.....', '.....', 'R...*', '.....', '.....'] },
-  { title: 'Belok Atas', map: ['....*', '.....', '.....', '.....', 'R....'] },
-  { title: 'Hindari Batu', map: ['.....', '.###.', 'R.#.*', '.....', '.....'] },
-  { title: 'Labirin Kecil', map: ['R..#*', '.#.#.', '.#...', '.####', '.....'] },
-  { title: 'Jalan Memutar', map: ['*..#.', '##.#.', '...#.', '.###.', '....R'] },
-  { title: 'Zig-Zag', map: ['R#...', '.#.#.', '.#.#.', '.#.#.', '...#*'] },
-];
+export type Level = { map: string[] };
 
 export type Pos = { r: number; c: number };
 
@@ -60,3 +51,34 @@ export const MOVE: Record<Dir, Pos> = {
 };
 
 export const ARROW: Record<Dir, string> = { up: '⬆️', down: '⬇️', left: '⬅️', right: '➡️' };
+
+const SIZE = 5;
+const MIN_STEPS = 5;
+const MAX_STEPS = 11;
+
+const randInt = (n: number) => Math.floor(Math.random() * n);
+
+/**
+ * Buat peta acak 5x5: posisi robot, bintang, dan batu diacak.
+ * Diulang sampai petanya pasti bisa diselesaikan dan panjang jalannya pas untuk anak.
+ */
+export function randomLevel(): Level {
+  for (;;) {
+    const grid = Array.from({ length: SIZE }, () => Array<string>(SIZE).fill('.'));
+    const start = { r: randInt(SIZE), c: randInt(SIZE) };
+    const goal = { r: randInt(SIZE), c: randInt(SIZE) };
+    if (Math.abs(start.r - goal.r) + Math.abs(start.c - goal.c) < 4) continue;
+    grid[start.r][start.c] = 'R';
+    grid[goal.r][goal.c] = '*';
+    for (let n = 5 + randInt(4); n > 0; ) {
+      const r = randInt(SIZE);
+      const c = randInt(SIZE);
+      if (grid[r][c] !== '.') continue;
+      grid[r][c] = '#';
+      n--;
+    }
+    const level = { map: grid.map((row) => row.join('')) };
+    const { shortest } = parseLevel(level);
+    if (shortest >= MIN_STEPS && shortest <= MAX_STEPS) return level;
+  }
+}

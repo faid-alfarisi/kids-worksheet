@@ -1,9 +1,7 @@
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { CodingPreview } from '../../components/CodingPreview';
-import { getCategory, MAZE_ID } from '../../data/categories';
-import { CODING_LEVELS } from '../../data/coding';
+import { getCategory } from '../../data/categories';
 import { SHEETS } from '../../data/sheets';
 
 export default function CategoryScreen() {
@@ -11,8 +9,7 @@ export default function CategoryScreen() {
   const cat = getCategory(id);
   if (!cat) return null;
 
-  const isMaze = cat.id === MAZE_ID;
-  const items = isMaze ? CODING_LEVELS.map((_, i) => i) : (SHEETS[cat.id] ?? []).map((_, i) => i);
+  const items = (SHEETS[cat.id] ?? []).map((_, i) => i);
 
   return (
     <>
@@ -36,15 +33,11 @@ export default function CategoryScreen() {
             style={({ pressed }) => [styles.card, { borderColor: cat.color }, pressed && styles.pressed]}
           >
             <View style={styles.thumbBox}>
-              {isMaze ? (
-                <CodingPreview level={CODING_LEVELS[i]} />
-              ) : (
-                <Image source={SHEETS[cat.id][i].thumb} style={styles.thumb} contentFit="cover" contentPosition="top" />
-              )}
+              <Image source={SHEETS[cat.id][i].thumb} style={styles.thumb} contentFit="cover" contentPosition="top" />
             </View>
             <View style={[styles.label, { backgroundColor: cat.color }]}>
               <Text style={styles.labelText} numberOfLines={1}>
-                {isMaze ? `Level ${i + 1} · ${CODING_LEVELS[i].title}` : `Soal ${i + 1}`}
+                Soal {i + 1}
               </Text>
             </View>
           </Pressable>

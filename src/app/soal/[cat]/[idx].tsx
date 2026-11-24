@@ -1,10 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CodingGame } from '../../../components/CodingGame';
 import { DrawingSheet } from '../../../components/DrawingSheet';
-import { countItems, getCategory, MAZE_ID } from '../../../data/categories';
-import { CODING_LEVELS } from '../../../data/coding';
+import { countItems, getCategory } from '../../../data/categories';
 import { SHEETS } from '../../../data/sheets';
 
 export default function SoalScreen() {
@@ -16,13 +14,12 @@ export default function SoalScreen() {
   const i = Number(idx) || 0;
   const total = countItems(cat.id);
   const go = (n: number) => router.replace({ pathname: '/soal/[cat]/[idx]', params: { cat: cat.id, idx: String(n) } });
-  const isMaze = cat.id === MAZE_ID;
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: isMaze ? `Level ${i + 1}: ${CODING_LEVELS[i].title}` : `${cat.title} · Soal ${i + 1}`,
+          title: `${cat.title} · Soal ${i + 1}`,
           headerStyle: { backgroundColor: cat.color },
           headerTintColor: '#fff',
           contentStyle: { backgroundColor: cat.soft },
@@ -30,11 +27,7 @@ export default function SoalScreen() {
         }}
       />
       <View style={styles.content}>
-        {isMaze ? (
-          <CodingGame key={i} level={CODING_LEVELS[i]} color={cat.color} onNext={i < total - 1 ? () => go(i + 1) : undefined} />
-        ) : (
-          <DrawingSheet key={`${cat.id}-${i}`} sheet={SHEETS[cat.id][i]} color={cat.color} />
-        )}
+        <DrawingSheet key={`${cat.id}-${i}`} sheet={SHEETS[cat.id][i]} color={cat.color} />
       </View>
       <View style={[styles.nav, { paddingBottom: 10 + insets.bottom }]}>
         <NavButton label="◀ Sebelumnya" disabled={i === 0} color={cat.color} onPress={() => go(i - 1)} />
