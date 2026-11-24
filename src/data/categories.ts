@@ -7,13 +7,15 @@ export type Category = {
   emoji: string;
   color: string;
   soft: string;
+  /** Kategori permainan acak: langsung buka layar ini, bukan daftar lembar soal. */
+  route?: '/cari-jalan' | '/memasangkan';
 };
 
 export const CATEGORIES: Category[] = [
-  { id: 'carijalan', title: 'Cari Jalan', subtitle: 'Atur arah robot sampai ke bintang', emoji: '🤖', color: '#7C4DFF', soft: '#EDE7FF' },
+  { id: 'carijalan', title: 'Cari Jalan', subtitle: 'Atur arah robot sampai ke bintang', emoji: '🤖', color: '#7C4DFF', soft: '#EDE7FF', route: '/cari-jalan' },
   { id: 'coding', title: 'Coding', subtitle: 'Kode warna & kode angka', emoji: '🧠', color: '#3949AB', soft: '#E6E9F8' },
   { id: 'berhitung', title: 'Berhitung', subtitle: 'Hitung benda & penjumlahan', emoji: '🔢', color: '#FF7043', soft: '#FFE9E2' },
-  { id: 'memasangkan', title: 'Memasangkan', subtitle: 'Tarik garis ke pasangannya', emoji: '🧩', color: '#26A69A', soft: '#DFF5F2' },
+  { id: 'memasangkan', title: 'Memasangkan', subtitle: 'Warna, bayangan, pasangan & hitung', emoji: '🧩', color: '#26A69A', soft: '#DFF5F2', route: '/memasangkan' },
   { id: 'menggaris', title: 'Menggaris', subtitle: 'Tebalkan garis & cari jalan (maze)', emoji: '✏️', color: '#42A5F5', soft: '#E3F2FD' },
   { id: 'mewarnai', title: 'Mewarnai', subtitle: 'Warnai gambar sesukamu', emoji: '🖍️', color: '#EC407A', soft: '#FCE4EC' },
   { id: 'melengkapi', title: 'Melengkapi Gambar', subtitle: 'Lengkapi separuh gambar hewan', emoji: '🦁', color: '#FFA000', soft: '#FFF3D6' },
@@ -25,8 +27,5 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const getCategory = (id: string) => CATEGORIES.find((c) => c.id === id);
-
-/** Kategori permainan robot (bukan lembar gambar). */
-export const MAZE_ID = 'carijalan';
 
 export const countItems = (id: string) => SHEETS[id]?.length ?? 0;
