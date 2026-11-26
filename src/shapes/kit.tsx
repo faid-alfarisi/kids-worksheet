@@ -20,7 +20,15 @@ export const OUTLINE = '#3A3A3A';
 export const SHADOW = '#262626';
 export const DARK = '#333';
 
-export type Paint = { fill: string; stroke: string; strokeWidth: number; strokeLinejoin: 'round'; strokeDasharray?: string };
+export type Paint = {
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  strokeLinejoin: 'round';
+  strokeDasharray?: string;
+  /** True bila pemanggil sengaja menimpa warna shape (prop `color` diisi). */
+  recolored?: boolean;
+};
 
 /** Warna & pola garis putus-putus untuk mode "tebalkan gambar". */
 export const TRACE_COLOR = '#90A4AE';
@@ -84,7 +92,7 @@ export function renderTwemoji(
                 ? { fill: SHADOW, stroke: SHADOW, strokeWidth: sw, strokeLinejoin: 'round' as const }
                 : partFills && el.n
                   ? { fill: partFills[i] ?? '#FFFFFF', stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const }
-                  : el.m
+                  : el.m && p.recolored
                     ? { fill: p.fill, stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const }
                     : { fill: el.f, stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const };
         if (el.t === 'p') return <Path key={i} {...paint} d={el.d} transform={el.x} />;

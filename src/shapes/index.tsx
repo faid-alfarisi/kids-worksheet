@@ -1,9 +1,11 @@
 import Svg, { Circle, Ellipse } from 'react-native-svg';
+import { ALAM } from './alam';
 import { BUAH } from './buah';
 import { DINOSAURUS } from './dinosaurus';
 import { HEWAN } from './hewan';
 import { drawLineOnly, drawStrokeOnly, drawTraced, hitShapeEl, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
 import { LAINNYA } from './lainnya';
+import { MAKANAN } from './makanan';
 import { SAYUR } from './sayur';
 import { SEKOLAH } from './sekolah';
 import { TRANSPORTASI } from './transportasi';
@@ -19,7 +21,9 @@ export const SHAPE_GROUPS = {
   sayur: SAYUR,
   hewan: HEWAN,
   dinosaurus: DINOSAURUS,
+  makanan: MAKANAN,
   transportasi: TRANSPORTASI,
+  alam: ALAM,
   sekolah: SEKOLAH,
   lainnya: LAINNYA,
 };
@@ -29,7 +33,9 @@ export const SHAPES = {
   ...SAYUR,
   ...HEWAN,
   ...DINOSAURUS,
+  ...MAKANAN,
   ...TRANSPORTASI,
+  ...ALAM,
   ...SEKOLAH,
   ...LAINNYA,
 };
@@ -107,6 +113,7 @@ export function Shape({
     stroke: silhouette ? SHADOW : OUTLINE,
     strokeWidth: 3,
     strokeLinejoin: 'round' as const,
+    recolored: color !== undefined,
   };
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">

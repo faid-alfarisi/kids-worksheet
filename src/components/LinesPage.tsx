@@ -18,7 +18,13 @@ export type LinesRow = { from: ShapeKind; to: ShapeKind; line: LineKind };
 
 // Yang "berjalan" (kiri) dan tujuannya (kanan).
 const MOVERS = [...Object.keys(SHAPE_GROUPS.hewan), ...Object.keys(SHAPE_GROUPS.transportasi)] as ShapeKind[];
-const TARGETS = [...Object.keys(SHAPE_GROUPS.buah), ...Object.keys(SHAPE_GROUPS.sayur), ...Object.keys(SHAPE_GROUPS.lainnya)] as ShapeKind[];
+const TARGETS = [
+  ...Object.keys(SHAPE_GROUPS.buah),
+  ...Object.keys(SHAPE_GROUPS.sayur),
+  ...Object.keys(SHAPE_GROUPS.makanan),
+  ...Object.keys(SHAPE_GROUPS.alam),
+  ...Object.keys(SHAPE_GROUPS.lainnya),
+] as ShapeKind[];
 
 const shuffle = <T,>(arr: readonly T[]): T[] => {
   const a = [...arr];

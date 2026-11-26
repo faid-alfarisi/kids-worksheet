@@ -49,6 +49,9 @@ const PAIRS: [ShapeKind, ShapeKind][] = [
   ['pensil', 'buku'],
   ['kelinci', 'wortel'],
   ['payung', 'sepatu'],
+  ['monyet', 'pisang'],
+  ['beruang', 'kado'],
+  ['eskrim', 'cupcake'],
 ];
 
 const ROWS = 4;
