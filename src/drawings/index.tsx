@@ -1,11 +1,21 @@
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
+import { BEBEK } from './bebek';
 import { BUNGA } from './bunga';
 import { KERANJANG_BUAH } from './buah';
 import { ESKRIM } from './eskrim';
+import { GURITA } from './gurita';
 import { IKAN } from './ikan';
+import { KAPAL_LAYAR } from './kapal';
+import { KELINCI } from './kelinci';
+import { KERANG } from './kerang';
 import { type DrawingDef, SIZE, visibleOutline } from './kit';
+import { KUCING } from './kucing';
+import { KUE } from './kue';
 import { KUPUKUPU } from './kupukupu';
+import { KURAKURA } from './kurakura';
+import { MOBIL } from './mobil';
 import { PEMANDANGAN } from './pemandangan';
+import { ROKET } from './roket';
 
 export { hitRegion, SIZE as DRAWING_SIZE, type DrawingDef } from './kit';
 
@@ -17,6 +27,16 @@ export const DRAWINGS = {
   eskrim: ESKRIM,
   ikan: IKAN,
   buah: KERANJANG_BUAH,
+  bebek: BEBEK,
+  kelinci: KELINCI,
+  kucing: KUCING,
+  gurita: GURITA,
+  kurakura: KURAKURA,
+  kerang: KERANG,
+  roket: ROKET,
+  mobil: MOBIL,
+  kapal: KAPAL_LAYAR,
+  kue: KUE,
 };
 
 export type DrawingId = keyof typeof DRAWINGS;
@@ -26,6 +46,19 @@ export const DRAWING_IDS = Object.keys(DRAWINGS) as DrawingId[];
 export const groupCount = (def: DrawingDef) => Math.max(...def.regions.map((r) => r.n));
 
 const OUTLINE = '#3A3A3A';
+
+/** Palet warna asli/contoh untuk tiap nomor kelompok warna (1..5) di gambar besar. */
+const SAMPLE_PALETTE: Record<number, string> = {
+  1: '#FF7043',
+  2: '#42A5F5',
+  3: '#FFCA28',
+  4: '#66BB6A',
+  5: '#AB47BC',
+};
+
+/** Fills warna contoh untuk seluruh region di sebuah drawing. */
+export const sampleDrawingFills = (def: DrawingDef): Record<number, string> =>
+  Object.fromEntries(def.regions.map((r, i) => [i, SAMPLE_PALETTE[r.n] ?? '#FFA726']));
 
 type Label = { text: string; wrong?: boolean };
 

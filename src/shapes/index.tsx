@@ -2,7 +2,7 @@ import Svg, { Circle, Ellipse } from 'react-native-svg';
 import { BUAH } from './buah';
 import { DINOSAURUS } from './dinosaurus';
 import { HEWAN } from './hewan';
-import { drawTraced, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
+import { drawLineOnly, drawTraced, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
 import { LAINNYA } from './lainnya';
 import { SAYUR } from './sayur';
 import { SEKOLAH } from './sekolah';
@@ -55,18 +55,28 @@ export function Shape({
   size,
   silhouette = false,
   trace = false,
+  lineOnly = false,
 }: {
   kind: ShapeKind;
   color?: string;
   size: number;
   silhouette?: boolean;
   trace?: boolean;
+  lineOnly?: boolean;
 }) {
   const def = shapeDef(kind);
   if (trace) {
     return (
       <Svg width={size} height={size} viewBox="0 0 100 100">
         {drawTraced(() => def.draw(TRACE_PAINT, true))}
+      </Svg>
+    );
+  }
+  if (lineOnly) {
+    const linePaint = { fill: '#fff', stroke: OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' as const };
+    return (
+      <Svg width={size} height={size} viewBox="0 0 100 100">
+        {drawLineOnly(() => def.draw(linePaint, false))}
       </Svg>
     );
   }

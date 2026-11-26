@@ -24,6 +24,9 @@ const PAIRS: [ShapeKind, ShapeKind][] = [
   ['kaos', 'celana'],
   ['mobil', 'rumah'],
   ['kupu', 'bunga'],
+  ['pensil', 'buku'],
+  ['kelinci', 'wortel'],
+  ['payung', 'sepatu'],
 ];
 
 const ROWS = 4;

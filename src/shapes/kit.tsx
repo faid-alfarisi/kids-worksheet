@@ -1,5 +1,38 @@
 import type { ReactNode } from 'react';
-import { Circle, G, Path } from 'react-native-svg';
+import { Circle, Ellipse, G, Path } from 'react-native-svg';
+
+export type TwEl =
+  | { t: 'p'; f: string; d: string; m?: 1; x?: string }
+  | { t: 'c'; f: string; cx: number; cy: number; r: number; m?: 1; x?: string }
+  | { t: 'e'; f: string; cx: number; cy: number; rx: number; ry: number; m?: 1; x?: string };
+
+/**
+ * Render elemen vector Twemoji (kanvas asli 36x36 → diskalakan ke 100x100 dengan margin rapi).
+ * Elemen bertanda `m: 1` adalah bagian utama (`{...p}`) yang warnanya mengikuti `color` shape / kode warna.
+ * Elemen lainnya memakai `part(f, sil)` tetapi dengan stroke proporsional di kanvas 36x36.
+ */
+export function renderTwemoji(els: readonly TwEl[], p: Paint, sil: boolean): ReactNode {
+  const sw = traceMode ? 0.55 : 0.9;
+  const dash = traceMode ? '1.4 1.1' : undefined;
+  return (
+    <G transform="translate(5 5) scale(2.5)">
+      {els.map((el, i) => {
+        const paint = traceMode
+          ? { fill: '#fff', stroke: TRACE_COLOR, strokeWidth: sw, strokeLinejoin: 'round' as const, strokeDasharray: dash }
+          : lineOnlyMode
+            ? { fill: '#fff', stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const }
+            : sil
+              ? { fill: SHADOW, stroke: SHADOW, strokeWidth: sw, strokeLinejoin: 'round' as const }
+              : el.m
+                ? { fill: p.fill, stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const }
+                : { fill: el.f, stroke: OUTLINE, strokeWidth: sw, strokeLinejoin: 'round' as const };
+        if (el.t === 'p') return <Path key={i} {...paint} d={el.d} transform={el.x} />;
+        if (el.t === 'c') return <Circle key={i} {...paint} cx={el.cx} cy={el.cy} r={el.r} transform={el.x} />;
+        return <Ellipse key={i} {...paint} cx={el.cx} cy={el.cy} rx={el.rx} ry={el.ry} transform={el.x} />;
+      })}
+    </G>
+  );
+}
 
 /**
  * Perlengkapan menggambar shape. Semua shape memakai kanvas 100x100.
@@ -30,12 +63,23 @@ export const TRACE_PAINT: Paint = { fill: '#fff', stroke: TRACE_COLOR, strokeWid
  * supaya `part()` dan `stroke()` ikut menggambar garis putus-putus tanpa mengubah tiap shape.
  */
 let traceMode = false;
+let lineOnlyMode = false;
+
 export function drawTraced<T>(fn: () => T): T {
   traceMode = true;
   try {
     return fn();
   } finally {
     traceMode = false;
+  }
+}
+
+export function drawLineOnly<T>(fn: () => T): T {
+  lineOnlyMode = true;
+  try {
+    return fn();
+  } finally {
+    lineOnlyMode = false;
   }
 }
 
@@ -59,11 +103,13 @@ export type ShapeDef = {
   draw: (p: Paint, sil: boolean) => ReactNode;
 };
 
-/** Cat untuk bagian berwarna tetap; jadi hitam saat bayangan, putus-putus saat mode tebalkan. */
+/** Cat untuk bagian berwarna tetap; jadi hitam saat bayangan, putih bergaris saat lineOnly, putus-putus saat mode tebalkan. */
 export const part = (fill: string, sil: boolean): Paint =>
   traceMode
     ? TRACE_PAINT
-    : { fill: sil ? SHADOW : fill, stroke: sil ? SHADOW : OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' };
+    : lineOnlyMode
+      ? { fill: '#fff', stroke: OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' }
+      : { fill: sil ? SHADOW : fill, stroke: sil ? SHADOW : OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' };
 
 /** Garis/tangkai tanpa isi. */
 export const stroke = (color: string, sil: boolean, width = 3) => ({

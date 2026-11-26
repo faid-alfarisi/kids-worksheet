@@ -1,17 +1,19 @@
 import { Stack } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DrawingArt, DRAWINGS } from '../drawings';
 import { Shape, SHAPE_GROUPS, type ShapeKind } from '../shapes';
 
 /**
- * Katalog semua shape & gambar besar (untuk pengembang, tidak ada di menu).
- * Buka lewat: kidsworksheet://katalog-shape
+ * Katalog semua shape & gambar besar.
+ * Buka lewat tombol di paling bawah Beranda atau deep link: kidsworksheet://katalog-shape
  */
 export default function KatalogShape() {
+  const insets = useSafeAreaInsets();
   return (
     <>
-      <Stack.Screen options={{ title: 'Katalog Shape' }} />
-      <ScrollView contentContainerStyle={styles.wrap}>
+      <Stack.Screen options={{ title: 'Katalog Shape & Gambar' }} />
+      <ScrollView contentContainerStyle={[styles.wrap, { paddingBottom: 24 + insets.bottom }]}>
         <View style={styles.group}>
           <Text style={styles.title}>Gambar besar (drawing)</Text>
           <View style={styles.grid}>
@@ -30,8 +32,9 @@ export default function KatalogShape() {
               {(Object.keys(shapes) as ShapeKind[]).map((kind) => (
                 <View key={kind} style={styles.item}>
                   <View style={styles.pair}>
-                    <Shape kind={kind} size={58} />
-                    <Shape kind={kind} size={58} silhouette />
+                    <Shape kind={kind} size={56} />
+                    <Shape kind={kind} size={56} silhouette />
+                    <Shape kind={kind} size={56} trace />
                   </View>
                   <Text style={styles.label}>{kind}</Text>
                 </View>

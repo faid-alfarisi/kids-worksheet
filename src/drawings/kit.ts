@@ -56,37 +56,108 @@ export const rect = (x: number, y: number, w: number, h: number, n: number, at?:
 export const poly = (pts: Pt[], n: number, at?: Pt) => region(pts, n, at);
 
 /**
- * Ubah path sederhana (perintah absolut M, L, Q, Z) jadi titik-titik.
- * Cukup untuk kurva-kurva lucu di drawing.
+ * Ubah path SVG lengkap (perintah absolut/relatif M/m, L/l, H/h, V/v, C/c, S/s, Q/q, Z/z)
+ * menjadi titik-titik poligon (dan opsional di-transform scale + translate).
  */
-export function pathPts(d: string, steps = 14): Pt[] {
-  const tok = d.match(/[MLQZ]|-?\d*\.?\d+/g) ?? [];
+export function pathPts(d: string, steps = 10, scale = 1, tx = 0, ty = 0): Pt[] {
+  const tok = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/g) ?? [];
   const pts: Pt[] = [];
   let i = 0;
   let cmd = '';
   let cur: Pt = [0, 0];
+  let start: Pt = [0, 0];
+  let lastC: Pt | null = null;
   const num = () => parseFloat(tok[i++]);
+  const push = (x: number, y: number) => pts.push([x * scale + tx, y * scale + ty]);
+
   while (i < tok.length) {
-    if (/[MLQZ]/.test(tok[i])) cmd = tok[i++];
-    if (cmd === 'Z') continue;
-    if (cmd === 'M' || cmd === 'L') {
-      cur = [num(), num()];
-      pts.push(cur);
-    } else if (cmd === 'Q') {
-      const c: Pt = [num(), num()];
-      const e: Pt = [num(), num()];
+    if (/[a-zA-Z]/.test(tok[i])) cmd = tok[i++];
+    const rel = cmd === cmd.toLowerCase();
+    const C = cmd.toUpperCase();
+    if (C === 'Z') {
+      cur = [...start];
+      lastC = null;
+      continue;
+    }
+    if (C === 'M') {
+      const x = num() + (rel ? cur[0] : 0);
+      const y = num() + (rel ? cur[1] : 0);
+      cur = [x, y];
+      start = [x, y];
+      push(x, y);
+      cmd = rel ? 'l' : 'L';
+      lastC = null;
+    } else if (C === 'L') {
+      const x = num() + (rel ? cur[0] : 0);
+      const y = num() + (rel ? cur[1] : 0);
+      cur = [x, y];
+      push(x, y);
+      lastC = null;
+    } else if (C === 'H') {
+      const x = num() + (rel ? cur[0] : 0);
+      cur = [x, cur[1]];
+      push(cur[0], cur[1]);
+      lastC = null;
+    } else if (C === 'V') {
+      const y = num() + (rel ? cur[1] : 0);
+      cur = [cur[0], y];
+      push(cur[0], cur[1]);
+      lastC = null;
+    } else if (C === 'Q') {
+      const cx = num() + (rel ? cur[0] : 0);
+      const cy = num() + (rel ? cur[1] : 0);
+      const ex = num() + (rel ? cur[0] : 0);
+      const ey = num() + (rel ? cur[1] : 0);
       for (let s = 1; s <= steps; s++) {
         const t = s / steps;
         const u = 1 - t;
-        pts.push([u * u * cur[0] + 2 * u * t * c[0] + t * t * e[0], u * u * cur[1] + 2 * u * t * c[1] + t * t * e[1]]);
+        push(u * u * cur[0] + 2 * u * t * cx + t * t * ex, u * u * cur[1] + 2 * u * t * cy + t * t * ey);
       }
-      cur = e;
+      cur = [ex, ey];
+      lastC = [cx, cy];
+    } else if (C === 'C') {
+      const c1x = num() + (rel ? cur[0] : 0);
+      const c1y = num() + (rel ? cur[1] : 0);
+      const c2x = num() + (rel ? cur[0] : 0);
+      const c2y = num() + (rel ? cur[1] : 0);
+      const ex = num() + (rel ? cur[0] : 0);
+      const ey = num() + (rel ? cur[1] : 0);
+      for (let s = 1; s <= steps; s++) {
+        const t = s / steps;
+        const u = 1 - t;
+        push(
+          u * u * u * cur[0] + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex,
+          u * u * u * cur[1] + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey,
+        );
+      }
+      cur = [ex, ey];
+      lastC = [c2x, c2y];
+    } else if (C === 'S') {
+      const c1x = lastC ? 2 * cur[0] - lastC[0] : cur[0];
+      const c1y = lastC ? 2 * cur[1] - lastC[1] : cur[1];
+      const c2x = num() + (rel ? cur[0] : 0);
+      const c2y = num() + (rel ? cur[1] : 0);
+      const ex = num() + (rel ? cur[0] : 0);
+      const ey = num() + (rel ? cur[1] : 0);
+      for (let s = 1; s <= steps; s++) {
+        const t = s / steps;
+        const u = 1 - t;
+        push(
+          u * u * u * cur[0] + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * ex,
+          u * u * u * cur[1] + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * ey,
+        );
+      }
+      cur = [ex, ey];
+      lastC = [c2x, c2y];
+    } else {
+      i++;
     }
   }
   return pts;
 }
 
-export const curvy = (d: string, n: number, at?: Pt) => region(pathPts(d), n, at);
+export const curvy = (d: string, n: number, at?: Pt, scale = 1, tx = 0, ty = 0) =>
+  region(pathPts(d, 10, scale, tx, ty), n, at);
 
 /** Titik di dalam poligon? (ray casting) */
 export function inside([x, y]: Pt, pts: Pt[]) {

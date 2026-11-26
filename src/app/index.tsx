@@ -1,19 +1,27 @@
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CATEGORIES } from '../data/categories';
 
 export default function Home() {
+  const insets = useSafeAreaInsets();
   return (
     <FlatList
       data={CATEGORIES}
       keyExtractor={(c) => c.id}
-      contentContainerStyle={styles.list}
+      contentContainerStyle={[styles.list, { paddingBottom: 24 + insets.bottom }]}
       ListHeaderComponent={<Text style={styles.hello}>Mau belajar apa hari ini? 👋</Text>}
+      ListFooterComponent={
+        <Pressable
+          onPress={() => router.push('/katalog-shape')}
+          style={({ pressed }) => [styles.katalogBtn, pressed && styles.pressed]}
+        >
+          <Text style={styles.katalogText}>🎨 Lihat Katalog Shape & Gambar</Text>
+        </Pressable>
+      }
       renderItem={({ item }) => (
         <Pressable
-          onPress={() =>
-            item.route ? router.push(item.route) : router.push({ pathname: '/kategori/[id]', params: { id: item.id } })
-          }
+          onPress={() => router.push(item.route)}
           style={({ pressed }) => [styles.card, { backgroundColor: item.soft, borderColor: item.color }, pressed && styles.pressed]}
         >
           <View style={[styles.badge, { backgroundColor: item.color }]}>
@@ -46,4 +54,15 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   title: { fontSize: 22, fontWeight: '900' },
   subtitle: { fontSize: 14, color: '#555', marginTop: 2 },
+  katalogBtn: {
+    marginTop: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#CFD8DC',
+    backgroundColor: '#F5F7F8',
+    alignItems: 'center',
+  },
+  katalogText: { fontSize: 14, fontWeight: '800', color: '#546E7A' },
 });

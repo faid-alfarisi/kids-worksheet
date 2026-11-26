@@ -36,39 +36,36 @@ Setiap permainan punya tombol **🔀 Acak** untuk soal baru dan **🏠** untuk k
 | 🧠 **Coding** | Kode warna: 6 benda berangka **atau** 1 gambar besar berangka | Pilih warna, tap bagian berangka. Benar → warna menempel; salah → ✕ merah sebentar. |
 | 🔢 **Berhitung** | 6 jenis lembar: tambah, kurang, hitung benda, tambah/kurang gambar, pasangkan jumlah | Pilih angka 0–10, tap kotak jawaban. |
 | 🧩 **Memasangkan** | Pasangan warna, bayangan, dan pasangan benda (baju ↔ celana, dll.) | Tarik garis lurus dari titik ke titik. Benar → hijau; salah → merah lalu hilang. |
-| ✏️ **Menggaris** | Garis putus-putus acak (lurus, gelombang, zigzag, dll.) + maze | Tebalkan garis dengan jari (tinta hitam). |
-| 🖍️ **Mewarnai** | Gambar besar acak + beberapa lembar gambar | Warnai bebas, 16 warna krayon. Garis tepi tetap rapi di atas coretan. |
-| 🦁 **Melengkapi** | Lembar melengkapi gambar hewan | Coret bebas di atas lembar. |
+| ✏️ **Menggaris** | Garis putus-putus acak (lurus, gelombang, zigzag, dll.) | Tebalkan garis dengan jari (tinta hitam). |
+| 🖍️ **Mewarnai** | Gambar besar acak + contoh kecil berwarna di pojok kanan atas | Warnai bebas, 16 warna krayon. Garis tepi tetap rapi di atas coretan. |
+| 🦁 **Melengkapi** | Separuh kiri gambar di atas grid kotak bantu + contoh utuh di pojok kanan atas | Gambar separuh kanannya, lalu warnai sesukanya. |
 | ⚖️ **Perbandingan** | 4 baris benda dengan ukuran berbeda | Tap yang *paling/lebih besar* atau *kecil* (satu pertanyaan per lembar). |
 | 📝 **Menulis** | Gambar benda + namanya dalam huruf putus-putus | Tebalkan hurufnya (tinta hitam). |
-| 🐰 **Menggambar** | Shape atau gambar besar dalam garis putus-putus | Tebalkan garisnya, lalu warnai sesukanya. |
+| 🐰 **Menggambar** | Shape atau gambar besar dalam garis putus-putus + contoh kecil di pojok kanan atas | Tebalkan garisnya, lalu warnai sesukanya. |
 
 ## 🧱 Teknologi
 
 - [Expo SDK 58](https://docs.expo.dev/) + [Expo Router](https://docs.expo.dev/router/introduction/) (routing berbasis file di `src/app/`)
 - React Native 0.88, React 19, TypeScript
-- [`react-native-svg`](https://github.com/software-mansion/react-native-svg): semua shape, gambar, dan garis digambar dengan kode (tanpa file gambar)
-- [`expo-image`](https://docs.expo.dev/versions/latest/sdk/image/) untuk lembar gambar yang tersisa
+- [`react-native-svg`](https://github.com/software-mansion/react-native-svg): 100% shape, gambar besar, dan garis digambar dengan vektor SVG (tanpa file gambar raster)
 
 ## 📁 Struktur proyek
 
 ```
 src/
 ├── app/                 # Layar (Expo Router). Satu file = satu layar.
-│   ├── index.tsx        # Beranda: daftar kategori
+│   ├── index.tsx        # Beranda: daftar kategori + tombol katalog
 │   ├── cari-jalan.tsx   # Tiap kategori permainan punya layar sendiri
 │   ├── coding.tsx  berhitung.tsx  memasangkan.tsx  perbandingan.tsx
-│   ├── menggaris.tsx  mewarnai.tsx  menulis.tsx  menggambar.tsx
-│   ├── kategori/[id].tsx, soal/[cat]/[idx].tsx   # Kategori berbasis lembar gambar
-│   └── katalog-shape.tsx                        # Katalog pengembang (tidak ada di menu)
+│   ├── menggaris.tsx  mewarnai.tsx  melengkapi.tsx  menulis.tsx  menggambar.tsx
+│   └── katalog-shape.tsx                        # Katalog semua shape & gambar besar
 ├── components/          # Komponen permainan (MazeGame, MatchGame, CountGame, DrawingSheet, ...)
 ├── data/                # Daftar kategori + generator soal acak tiap permainan
 ├── shapes/              # Koleksi shape kecil, 1 file per kelompok (buah, hewan, ...)
 ├── drawings/            # Koleksi gambar besar yang terdiri dari beberapa bagian bernomor
 └── lines/               # Koleksi pola garis (lurus, gelombang, zigzag, ...)
 assets/
-├── icon.png, android-icon-*.png, splash-icon.png
-└── worksheets/          # Lembar gambar yang masih dipakai (melengkapi, menggaris, mewarnai)
+└── icon.png, android-icon-*.png, splash-icon.png
 ```
 
 ## 🚀 Menjalankan
@@ -154,23 +151,16 @@ Semua konten digambar dengan SVG lewat kode, jadi menambah konten tidak perlu fi
 
 | Mau menambah | Caranya |
 |---|---|
-| **Shape** (benda kecil) | Tambah entri di file kelompoknya di `src/shapes/` (petunjuk di `kit.tsx`). Otomatis dipakai Memasangkan, Perbandingan, Berhitung, Menggambar, dan Menulis. Isi `code` agar bisa dipakai di Coding. |
-| **Gambar besar** | Buat file baru di `src/drawings/` dari region bernomor (petunjuk di `kit.ts`), lalu daftarkan di `index.tsx`. Otomatis dipakai Coding, Mewarnai, dan Menggambar. |
+| **Shape** (benda kecil) | Tambah entri di file kelompoknya di `src/shapes/` (petunjuk di `kit.tsx`). Otomatis dipakai Memasangkan, Perbandingan, Berhitung, Menggambar, Melengkapi, dan Menulis. Isi `code` agar bisa dipakai di Coding. |
+| **Gambar besar** | Buat file baru di `src/drawings/` dari region bernomor (petunjuk di `kit.ts`), lalu daftarkan di `index.tsx`. Otomatis dipakai Coding, Mewarnai, Menggambar, dan Melengkapi. |
 | **Pola garis** | Tambah fungsi di `LINE_PATTERNS` (`src/lines/index.ts`). |
-| **Lembar gambar** | Taruh gambar di `assets/worksheets/<kategori>/` dan daftarkan di `src/data/sheets.ts`. |
 
-Untuk melihat semua shape (beserta bayangannya) dan gambar besar (beserta nomornya),
-buka katalog pengembang di HP:
-
-```bash
-adb shell am start -a android.intent.action.VIEW -d "kidsworksheet://katalog-shape"
-```
+Untuk melihat semua shape (beserta bayangan & garis putus-putusnya) dan gambar besar (beserta nomornya),
+tekan tombol **🎨 Lihat Katalog Shape & Gambar** di bagian paling bawah Beranda.
 
 ## 🙏 Sumber gambar
 
-Hampir semua konten digambar dengan kode oleh proyek ini. Beberapa lembar kerja (Melengkapi, Menggaris,
-Mewarnai) berasal dari situs lembar kerja gratis seperti LembarBelajar.com dan LembarKerja.com, dan
-watermark aslinya tetap dibiarkan. Daftar lengkapnya ada di **[CREDITS.md](CREDITS.md)**.
+Semua konten digambar dengan vektor SVG (menggunakan aset open-source Twemoji & OpenMoji). Daftar atribusinya ada di **[CREDITS.md](CREDITS.md)**.
 
 ## 📦 Info aplikasi
 

@@ -1,8 +1,6 @@
-import { Image } from 'expo-image';
 import { type ReactNode, useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import type { Sheet } from '../data/sheets';
 import { DrawingArt, type DrawingDef } from '../drawings';
 
 // Dua baris krayon: warna cerah di atas, warna lembut/netral di bawah (putih bisa jadi penghapus).
@@ -20,23 +18,23 @@ export type CustomPage = { ratio: number; render: (w: number, h: number) => Reac
 
 /**
  * Kanvas coret-coret (pakai jari) di atas salah satu latar:
- *  - `sheet`: lembar soal (gambar),
  *  - `art`: gambar besar (drawing); garis tepinya digambar DI ATAS coretan supaya tetap rapi,
- *  - `page`: halaman buatan sendiri (mis. lembar menulis).
+ *  - `page`: halaman buatan sendiri (mis. lembar menulis, menggaris, melengkapi).
+ * `preview` = kartu contoh kecil di pojok kanan atas kertas (tidak ikut tercoret).
  * `ink` = satu warna tetap (pemilih warna disembunyikan), mis. hitam untuk menulis.
  * `startColor` = warna awal krayon (pemilih warna tetap tampil).
  */
 export function DrawingSheet({
-  sheet,
   art,
   page,
+  preview,
   ink,
   startColor,
   color: accent,
 }: {
-  sheet?: Sheet;
   art?: DrawingDef;
   page?: CustomPage;
+  preview?: ReactNode;
   ink?: string;
   startColor?: string;
   color: string;
@@ -63,30 +61,30 @@ export function DrawingSheet({
   // eslint-disable-next-line react-hooks/refs
   const [pan] = useState(() =>
     PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderTerminationRequest: () => false,
-        onPanResponderGrant: (e) => {
-          const { locationX: x, locationY: y } = e.nativeEvent;
-          pathRef.current = `M${x.toFixed(1)} ${y.toFixed(1)} l0.1 0.1`;
-          setCurrent(pathRef.current);
-        },
-        onPanResponderMove: (e) => {
-          const { locationX: x, locationY: y } = e.nativeEvent;
-          pathRef.current += ` L${x.toFixed(1)} ${y.toFixed(1)}`;
-          setCurrent(pathRef.current);
-        },
-        onPanResponderRelease: () => {
-          const d = pathRef.current;
-          if (d) setStrokes((s) => [...s, { d, ...styleRef.current }]);
-          pathRef.current = '';
-          setCurrent(null);
-        },
-      }),
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (e) => {
+        const { locationX: x, locationY: y } = e.nativeEvent;
+        pathRef.current = `M${x.toFixed(1)} ${y.toFixed(1)} l0.1 0.1`;
+        setCurrent(pathRef.current);
+      },
+      onPanResponderMove: (e) => {
+        const { locationX: x, locationY: y } = e.nativeEvent;
+        pathRef.current += ` L${x.toFixed(1)} ${y.toFixed(1)}`;
+        setCurrent(pathRef.current);
+      },
+      onPanResponderRelease: () => {
+        const d = pathRef.current;
+        if (d) setStrokes((s) => [...s, { d, ...styleRef.current }]);
+        pathRef.current = '';
+        setCurrent(null);
+      },
+    }),
   );
 
   // Ukuran gambar menyesuaikan ruang yang ada (contain), kanvas persis di atas gambar.
-  const ratio = page ? page.ratio : art || !sheet ? 1 : sheet.w / sheet.h;
+  const ratio = page ? page.ratio : 1;
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     const w = Math.min(width - 16, (height - 16) * ratio);
@@ -98,13 +96,7 @@ export function DrawingSheet({
       <View style={styles.stage} onLayout={onLayout}>
         {box.w > 0 && (
           <View style={[styles.paper, { width: box.w, height: box.h }]}>
-            {page ? (
-              page.render(box.w, box.h)
-            ) : art ? (
-              <DrawingArt def={art} size={box.w} layer="fill" />
-            ) : (
-              sheet && <Image source={sheet.image} style={StyleSheet.absoluteFill} contentFit="contain" />
-            )}
+            {page ? page.render(box.w, box.h) : art ? <DrawingArt def={art} size={box.w} layer="fill" /> : null}
             <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
               {/* pointerEvents none: sentuhan selalu jatuh ke View induk, jadi locationX/Y konsisten */}
               <Svg width={box.w} height={box.h} pointerEvents="none">
@@ -121,6 +113,11 @@ export function DrawingSheet({
                 <DrawingArt def={art} size={box.w} layer="line" />
               </View>
             )}
+            {preview && (
+              <View style={[styles.previewCard, { borderColor: accent }]} pointerEvents="none">
+                {preview}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -128,15 +125,15 @@ export function DrawingSheet({
       <View style={styles.toolbar}>
         {!ink &&
           CRAYON_ROWS.map((row) => (
-          <View key={row[0]} style={styles.colors}>
-            {row.map((c) => (
-              <Pressable
-                key={c}
-                onPress={() => pickCrayon(c)}
-                style={[styles.dot, { backgroundColor: c }, c === '#FFFFFF' && styles.dotWhite, crayon === c && styles.dotActive]}
-              />
-            ))}
-          </View>
+            <View key={row[0]} style={styles.colors}>
+              {row.map((c) => (
+                <Pressable
+                  key={c}
+                  onPress={() => pickCrayon(c)}
+                  style={[styles.dot, { backgroundColor: c }, c === '#FFFFFF' && styles.dotWhite, crayon === c && styles.dotActive]}
+                />
+              ))}
+            </View>
           ))}
         <View style={styles.actions}>
           {SIZES.map((s) => (
@@ -164,7 +161,32 @@ function ToolButton({ label, onPress }: { label: string; onPress: () => void }) 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  paper: { backgroundColor: '#fff', borderRadius: 6, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
+  paper: {
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  previewCard: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FFFDF7',
+    borderRadius: 12,
+    borderWidth: 2,
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
   toolbar: { backgroundColor: '#fff', paddingHorizontal: 12, paddingTop: 10, gap: 8, borderTopWidth: 1, borderColor: '#eee' },
   colors: { flexDirection: 'row', justifyContent: 'space-between' },
   dot: { width: 34, height: 34, borderRadius: 17, borderWidth: 3, borderColor: '#fff' },
