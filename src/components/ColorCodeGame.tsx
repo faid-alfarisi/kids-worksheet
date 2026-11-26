@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { type CodeRound, roundNumbers } from '../data/colorcode';
-import { DRAWING_SIZE, DrawingArt, type DrawingDef, DRAWINGS, hitRegion } from '../drawings';
-import { Shape, shapeDef, type ShapeKind } from '../shapes';
+import { hitShapeEl, Shape, shapeDef, type ShapeKind } from '../shapes';
 
 const WRONG_MS = 700;
 const BLANK = '#FFFFFF';
 
 /**
- * Coding kode warna: legenda angka→warna di atas, benda/gambar berangka di tengah, pilihan warna di bawah.
- * Pilih warna lalu tap benda. Benar → warna menempel, angka hilang.
- * Salah → "tet tot": angka jadi ✕ merah sebentar (benda bergoyang), lalu kembali jadi angka.
+ * Coding kode warna: legenda angka→warna di atas, 6 shape kecil ATAU 1 shape besar multi-angka di tengah, pilihan warna di bawah.
+ * Pilih warna lalu tap bagian berangka. Benar → warna menempel, angka hilang.
+ * Salah → "tet tot": angka jadi ✕ merah sebentar, lalu kembali jadi angka.
  */
-export function ColorCodeGame({ round, color: accent, onShuffle }: { round: CodeRound; color: string; onShuffle: () => void }) {
+export function ColorCodeGame({ round, color: accent, onDone }: { round: CodeRound; color: string; onDone?: () => void }) {
   const [area, setArea] = useState({ w: 0, h: 0 });
   const [picked, setPicked] = useState<number | null>(null); // indeks warna terpilih
   const [painted, setPainted] = useState<Record<number, boolean>>({});
@@ -26,6 +25,10 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
 
   const numbers = roundNumbers(round);
   const done = Object.keys(painted).length === numbers.length;
+
+  useEffect(() => {
+    if (done) onDone?.();
+  }, [done, onDone]);
 
   const flash = (fn: () => void) => {
     if (timer.current) clearTimeout(timer.current);
@@ -55,107 +58,156 @@ export function ColorCodeGame({ round, color: accent, onShuffle }: { round: Code
 
   return (
     <View style={styles.wrap}>
-      {/* Legenda kode */}
-      <View style={[styles.legend, { borderColor: accent }]}>
-        {round.colors.map((c, i) => (
-          <View key={c.hex} style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: c.hex }]}>
-              <Text style={styles.legendNum}>{i + 1}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
-      <View style={[styles.board, { borderColor: accent }]}>
-        {/* Diukur di dalam border supaya 2 kolom pas. */}
-        <View style={styles.grid} onLayout={onLayout}>
-        {area.w > 0 && round.type === 'drawing' && (
-          <DrawingBoard
-            def={DRAWINGS[round.id]}
-            size={Math.min(area.w, area.h) * 0.96}
-            fills={Object.fromEntries(Object.keys(painted).map((k) => [k, round.colors[numbers[+k] - 1].hex]))}
-            painted={painted}
-            wrong={wrong}
-            onTap={tapItem}
-          />
-        )}
-        {area.w > 0 &&
-          round.type === 'shapes' &&
-          round.items.map((item, i) => (
-            <View key={i} style={[styles.cell, { width: area.w / cols, height: area.h / rows }]}>
-              <CodeItem
-                kind={item.kind}
-                number={item.number}
-                fill={painted[i] ? round.colors[item.number - 1].hex : null}
-                wrong={wrong === i}
-                size={size}
-                onPress={() => tapItem(i)}
-              />
+      {/* Legenda kode (berubah jadi banner menang saat selesai, tanpa menggeser papan) */}
+      {done ? (
+        <View style={styles.winHeader}>
+          <Text style={styles.winHeaderText}>🎉 Hebat! Semua benar!</Text>
+        </View>
+      ) : (
+        <View style={[styles.legend, { borderColor: accent }]}>
+          {round.colors.map((c, i) => (
+            <View key={c.hex} style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: c.hex }]}>
+                <Text style={styles.legendNum}>{i + 1}</Text>
+              </View>
             </View>
           ))}
         </View>
+      )}
+
+      <View style={[styles.board, { borderColor: done ? '#43A047' : accent }]}>
+        {/* Diukur di dalam border supaya 2 kolom pas. */}
+        <View style={styles.grid} onLayout={onLayout}>
+          {area.w > 0 && round.type === 'bigShape' && (
+            <BigShapeBoard
+              kind={round.kind}
+              size={Math.min(area.w, area.h) * 0.9}
+              colors={round.colors.map((c) => c.hex)}
+              painted={painted}
+              wrong={wrong}
+              onTap={tapItem}
+            />
+          )}
+          {area.w > 0 &&
+            round.type === 'shapes' &&
+            round.items.map((item, i) => (
+              <View key={i} style={[styles.cell, { width: area.w / cols, height: area.h / rows }]}>
+                <CodeItem
+                  kind={item.kind}
+                  number={item.number}
+                  fill={painted[i] ? round.colors[item.number - 1].hex : null}
+                  wrong={wrong === i}
+                  size={size}
+                  onPress={() => tapItem(i)}
+                />
+              </View>
+            ))}
+        </View>
       </View>
 
-      {done ? (
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>🎉 Hebat! Semua benar!</Text>
-          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: accent }]}>
-            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
-          </Pressable>
+      <View style={[styles.pickerWrap, done && { opacity: 0.35 }]} pointerEvents={done ? 'none' : 'auto'}>
+        <Text style={[styles.pickerLabel, hint && styles.hint]}>{hint ? 'Pilih warnanya dulu di sini 👇' : 'Pilih warna, lalu tap gambarnya'}</Text>
+        {/* Pilihan warna tanpa angka, urutannya beda dari legenda, supaya anak tetap membaca kodenya. */}
+        <View style={styles.picker}>
+          {round.colors
+            .map((c, i) => ({ c, i }))
+            .sort((a, b) => a.c.hex.localeCompare(b.c.hex))
+            .map(({ c, i }) => (
+              <Pressable
+                key={c.hex}
+                onPress={() => setPicked(i)}
+                accessibilityLabel={`Warna ${c.name}`}
+                style={[styles.swatch, { backgroundColor: c.hex }, picked === i && styles.swatchActive]}
+              />
+            ))}
         </View>
-      ) : (
-        <View style={styles.pickerWrap}>
-          <Text style={[styles.pickerLabel, hint && styles.hint]}>{hint ? 'Pilih warnanya dulu di sini 👇' : 'Pilih warna, lalu tap gambarnya'}</Text>
-          {/* Pilihan warna tanpa angka, urutannya beda dari legenda, supaya anak tetap membaca kodenya. */}
-          <View style={styles.picker}>
-            {round.colors
-              .map((c, i) => ({ c, i }))
-              .sort((a, b) => a.c.hex.localeCompare(b.c.hex))
-              .map(({ c, i }) => (
-                <Pressable
-                  key={c.hex}
-                  onPress={() => setPicked(i)}
-                  accessibilityLabel={`Warna ${c.name}`}
-                  style={[styles.swatch, { backgroundColor: c.hex }, picked === i && styles.swatchActive]}
-                />
-              ))}
-          </View>
-        </View>
-      )}
+      </View>
     </View>
   );
 }
 
-/** Gambar besar berangka; bagian yang disentuh dicari dengan hit test poligon. */
-function DrawingBoard({
-  def,
+/**
+ * Satu shape besar dengan beberapa angka di dalamnya (mode Coding Gambar Besar).
+ * Bisa di-tap pada bagian gambarnya maupun langsung pada angka/lingkarannya.
+ */
+function BigShapeBoard({
+  kind,
   size,
-  fills,
+  colors,
   painted,
   wrong,
   onTap,
 }: {
-  def: DrawingDef;
+  kind: ShapeKind;
   size: number;
-  fills: Record<number, string>;
+  colors: string[];
   painted: Record<number, boolean>;
   wrong: number | null;
-  onTap: (i: number) => void;
+  onTap: (targetIdx: number) => void;
 }) {
-  const labels = Object.fromEntries(
-    def.regions.map((r, i) => [i, painted[i] ? null : { text: wrong === i ? '✕' : String(r.n), wrong: wrong === i }]),
-  );
+  const els = shapeDef(kind).els ?? [];
+  // Daftar target berlabel (elemen yang punya n dan at)
+  const targets = els
+    .map((el, elIdx) => ({ el, elIdx }))
+    .filter((t) => t.el.n && t.el.at);
+
+  // Hitung warna untuk setiap elemen di `els`:
+  // - jika elemen itu sendiri punya target yang sudah painted -> warnai
+  // - jika elemen punya `n` tanpa `at` (elemen pendamping dalam kelompok warna yang sama), ikut menyala saat semua atau salah satu target kelompok `n` itu diwarnai
+  const partFills: Record<number, string> = {};
+  const groupPainted: Record<number, boolean> = {};
+  targets.forEach((t, tIdx) => {
+    if (painted[tIdx]) {
+      partFills[t.elIdx] = colors[t.el.n! - 1];
+      groupPainted[t.el.n!] = true;
+    }
+  });
+  els.forEach((el, elIdx) => {
+    if (el.n && !el.at && groupPainted[el.n]) {
+      partFills[elIdx] = colors[el.n - 1];
+    }
+  });
+
+  const badge = size * 0.11;
+
   return (
     <View
-      style={[styles.drawing, { width: size, height: size }]}
+      style={{ width: size, height: size }}
       onStartShouldSetResponder={() => true}
       onResponderRelease={(e) => {
         const { locationX: x, locationY: y } = e.nativeEvent;
-        const i = hitRegion(def, [(x / size) * DRAWING_SIZE, (y / size) * DRAWING_SIZE]);
-        if (i >= 0) onTap(i);
+        const pt: [number, number] = [(x / size) * 100, (y / size) * 100];
+        const hitIdx = hitShapeEl(els, pt);
+        if (hitIdx < 0) return;
+        const tIdx = targets.findIndex((t) => t.elIdx === hitIdx);
+        if (tIdx >= 0 && !painted[tIdx]) onTap(tIdx);
       }}
     >
-      <DrawingArt def={def} size={size} fills={fills} labels={labels} />
+      <Shape kind={kind} size={size} partFills={partFills} />
+      {targets.map((t, tIdx) => {
+        if (painted[tIdx]) return null;
+        const [ax, ay] = t.el.at!;
+        const isWrong = wrong === tIdx;
+        return (
+          <Pressable
+            key={tIdx}
+            onPress={() => onTap(tIdx)}
+            style={[
+              styles.badge,
+              {
+                width: badge,
+                height: badge,
+                left: (ax / 100) * size - badge / 2,
+                top: (ay / 100) * size - badge / 2,
+              },
+            ]}
+          >
+            <Text style={[styles.badgeText, { fontSize: badge * 0.68 }, isWrong && styles.badgeWrong]}>
+              {isWrong ? '✕' : t.el.n}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -194,14 +246,23 @@ function CodeItem({ kind, number, fill, wrong, size, onPress }: { kind: ShapeKin
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: 14, gap: 10 },
   legend: { flexDirection: 'row', justifyContent: 'center', gap: 14, backgroundColor: '#fff', borderRadius: 16, borderWidth: 3, paddingVertical: 10 },
+  winHeader: { backgroundColor: '#43A047', borderRadius: 16, borderWidth: 3, borderColor: '#43A047', minHeight: 74, alignItems: 'center', justifyContent: 'center' },
+  winHeaderText: { color: '#fff', fontSize: 22, fontWeight: '900' },
   legendItem: { alignItems: 'center' },
   legendDot: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: '#3A3A3A', alignItems: 'center', justifyContent: 'center' },
   legendNum: { fontSize: 24, fontWeight: '900', color: '#fff', textShadowColor: '#000', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
   board: { flex: 1, backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, overflow: 'hidden' },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' },
-  drawing: { alignSelf: 'center' },
   cell: { alignItems: 'center', justifyContent: 'center' },
-  badge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
+  badge: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 99,
+    borderWidth: 1.5,
+    borderColor: '#CFD8DC',
+  },
   badgeText: { fontWeight: '900', color: '#37474F', includeFontPadding: false },
   badgeWrong: { color: '#E53935', transform: [{ scale: 1.5 }] },
   pickerWrap: { gap: 6, alignItems: 'center' },

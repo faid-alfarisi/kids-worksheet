@@ -14,7 +14,7 @@ type Round = { mode: string; prompt: string; problems: CountProblem[] };
  * Benar → angka tetap di kotak. Salah → ✕ merah sebentar, kotak kosong lagi.
  * Setelah tap kotak, pilihan angka dilepas (harus pilih lagi). Angka di pemilih tidak berkurang.
  */
-export function CountGame({ round, color: accent, onShuffle }: { round: Round; color: string; onShuffle: () => void }) {
+export function CountGame({ round, color: accent, onDone }: { round: Round; color: string; onDone?: () => void }) {
   const [area, setArea] = useState({ w: 0, h: 0 });
   const [picked, setPicked] = useState<number | null>(null);
   const [filled, setFilled] = useState<Record<number, boolean>>({});
@@ -32,6 +32,10 @@ export function CountGame({ round, color: accent, onShuffle }: { round: Round; c
   };
 
   const done = Object.keys(filled).length === round.problems.length;
+
+  useEffect(() => {
+    if (done) onDone?.();
+  }, [done, onDone]);
 
   const tapBox = (i: number) => {
     if (filled[i]) return;
@@ -62,9 +66,11 @@ export function CountGame({ round, color: accent, onShuffle }: { round: Round; c
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.prompt}>{round.prompt}</Text>
+      <View style={[styles.promptBox, done && styles.promptWin]}>
+        <Text style={[styles.prompt, done && styles.promptWinText]}>{done ? '🎉 Hebat! Semua benar!' : round.prompt}</Text>
+      </View>
 
-      <View style={[styles.board, { borderColor: accent }]}>
+      <View style={[styles.board, { borderColor: done ? GREEN : accent }]}>
         <View style={styles.grid} onLayout={onLayout}>
           {area.w > 0 &&
             round.problems.map((p, i) => {
@@ -91,34 +97,25 @@ export function CountGame({ round, color: accent, onShuffle }: { round: Round; c
         </View>
       </View>
 
-      {done ? (
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>🎉 Hebat! Semua benar!</Text>
-          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: accent }]}>
-            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <View style={styles.pickerWrap}>
-          <Text style={[styles.pickerLabel, hint && { color: RED }]}>{hint ? 'Pilih angkanya dulu di sini 👇' : 'Pilih angka, lalu tap kotaknya'}</Text>
-          {[
-            [0, 1, 2, 3, 4, 5],
-            [6, 7, 8, 9, MAX_NUMBER],
-          ].map((line) => (
-            <View key={line[0]} style={styles.pickerRow}>
-              {line.map((n) => (
-                <Pressable
-                  key={n}
-                  onPress={() => setPicked(picked === n ? null : n)}
-                  style={[styles.key, { borderColor: accent }, picked === n && { backgroundColor: accent, transform: [{ scale: 1.12 }] }]}
-                >
-                  <Text style={[styles.keyText, { color: picked === n ? '#fff' : accent }]}>{n}</Text>
-                </Pressable>
-              ))}
-            </View>
-          ))}
-        </View>
-      )}
+      <View style={[styles.pickerWrap, done && { opacity: 0.35 }]} pointerEvents={done ? 'none' : 'auto'}>
+        <Text style={[styles.pickerLabel, hint && { color: RED }]}>{hint ? 'Pilih angkanya dulu di sini 👇' : 'Pilih angka, lalu tap kotaknya'}</Text>
+        {[
+          [0, 1, 2, 3, 4, 5],
+          [6, 7, 8, 9, MAX_NUMBER],
+        ].map((line) => (
+          <View key={line[0]} style={styles.pickerRow}>
+            {line.map((n) => (
+              <Pressable
+                key={n}
+                onPress={() => setPicked(picked === n ? null : n)}
+                style={[styles.key, { borderColor: accent }, picked === n && { backgroundColor: accent, transform: [{ scale: 1.12 }] }]}
+              >
+                <Text style={[styles.keyText, { color: picked === n ? '#fff' : accent }]}>{n}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -179,7 +176,10 @@ function Group({ kind, count, size, w, h }: { kind: ShapeKind; count: number; si
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: 14, gap: 10 },
+  promptBox: { borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  promptWin: { backgroundColor: GREEN },
   prompt: { fontSize: 18, color: '#444', fontWeight: '800', textAlign: 'center' },
+  promptWinText: { color: '#fff', fontSize: 19, fontWeight: '900' },
   board: { flex: 1, backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, overflow: 'hidden' },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap' },
   cell: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 4 },

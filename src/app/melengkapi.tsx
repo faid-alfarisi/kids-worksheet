@@ -4,12 +4,9 @@ import Svg, { Line, Rect } from 'react-native-svg';
 import { type CustomPage, DrawingSheet } from '../components/DrawingSheet';
 import { GameScreen } from '../components/GameScreen';
 import { getCategory } from '../data/categories';
-import { DrawingArt, type DrawingId, DRAWINGS, sampleDrawingFills } from '../drawings';
 import { Shape, type ShapeKind } from '../shapes';
 
-type Pick = { type: 'shape'; kind: ShapeKind } | { type: 'art'; id: DrawingId };
-
-// Shape & gambar besar yang simetris kiri-kanan sehingga enak dilengkapi separuh kanannya.
+// Shape yang simetris kiri-kanan sehingga enak dilengkapi separuh kanannya.
 const SYMMETRIC_SHAPES: ShapeKind[] = [
   'apel',
   'jeruk',
@@ -41,23 +38,14 @@ const SYMMETRIC_SHAPES: ShapeKind[] = [
   'topi',
 ];
 
-const SYMMETRIC_ARTS: DrawingId[] = ['bunga', 'kupukupu', 'eskrim', 'kucing', 'kelinci', 'gurita', 'kue'];
-
-const POOL: Pick[] = [
-  ...SYMMETRIC_SHAPES.map((kind) => ({ type: 'shape' as const, kind })),
-  ...SYMMETRIC_ARTS.map((id) => ({ type: 'art' as const, id })),
-];
-
-const key = (p: Pick) => (p.type === 'shape' ? p.kind : `art:${p.id}`);
-
-function randomPick(previous?: Pick): Pick {
-  const options = previous ? POOL.filter((p) => key(p) !== key(previous)) : POOL;
+function randomPick(previous?: ShapeKind): ShapeKind {
+  const options = previous ? SYMMETRIC_SHAPES.filter((k) => k !== previous) : SYMMETRIC_SHAPES;
   return options[Math.floor(Math.random() * options.length)];
 }
 
 const GRID_CELLS = 8; // 8x8 kotak bantu (4 kiri, 4 kanan)
 
-function halfPage(pick: Pick): CustomPage {
+function halfPage(kind: ShapeKind): CustomPage {
   return {
     ratio: 1,
     render: (w) => {
@@ -106,11 +94,7 @@ function halfPage(pick: Pick): CustomPage {
               overflow: 'hidden',
             }}
           >
-            {pick.type === 'shape' ? (
-              <Shape kind={pick.kind} size={artSize} lineOnly />
-            ) : (
-              <DrawingArt def={DRAWINGS[pick.id]} size={artSize} layer="line" />
-            )}
+            <Shape kind={kind} size={artSize} lineOnly />
           </View>
         </View>
       );
@@ -118,13 +102,7 @@ function halfPage(pick: Pick): CustomPage {
   };
 }
 
-function renderPreview(pick: Pick) {
-  if (pick.type === 'shape') return <Shape kind={pick.kind} size={60} />;
-  const def = DRAWINGS[pick.id];
-  return <DrawingArt def={def} size={64} fills={sampleDrawingFills(def)} />;
-}
-
-/** Melengkapi gambar: separuh kiri tampil di atas grid kotak bantu, anak menggambar separuh kanannya (+ contoh utuh di pojok kanan atas). */
+/** Melengkapi gambar: separuh kiri shape tampil di atas grid kotak bantu, anak menggambar separuh kanannya (+ contoh utuh di pojok kanan atas). */
 export default function MelengkapiScreen() {
   const cat = getCategory('melengkapi')!;
   const [state, setState] = useState(() => ({ id: 0, pick: randomPick() }));
@@ -135,7 +113,7 @@ export default function MelengkapiScreen() {
       <DrawingSheet
         key={state.id}
         page={halfPage(state.pick)}
-        preview={renderPreview(state.pick)}
+        preview={<Shape kind={state.pick} size={60} />}
         startColor="#212121"
         color={cat.color}
       />

@@ -33,21 +33,21 @@ Setiap permainan punya tombol **🔀 Acak** untuk soal baru dan **🏠** untuk k
 | Kategori | Isi | Cara main |
 |---|---|---|
 | 🤖 **Cari Jalan** | Papan 5×5 acak berisi robot, bintang, dan batu | Susun panah ⬆️⬇️⬅️➡️, tekan *Jalankan*. Peta selalu bisa diselesaikan. |
-| 🧠 **Coding** | Kode warna: 6 benda berangka **atau** 1 gambar besar berangka | Pilih warna, tap bagian berangka. Benar → warna menempel; salah → ✕ merah sebentar. |
+| 🧠 **Coding** | Kode warna: 6 benda berangka dengan legenda kode warna | Pilih warna, tap benda berangka. Benar → warna menempel; salah → ✕ merah sebentar. |
 | 🔢 **Berhitung** | 6 jenis lembar: tambah, kurang, hitung benda, tambah/kurang gambar, pasangkan jumlah | Pilih angka 0–10, tap kotak jawaban. |
 | 🧩 **Memasangkan** | Pasangan warna, bayangan, dan pasangan benda (baju ↔ celana, dll.) | Tarik garis lurus dari titik ke titik. Benar → hijau; salah → merah lalu hilang. |
 | ✏️ **Menggaris** | Garis putus-putus acak (lurus, gelombang, zigzag, dll.) | Tebalkan garis dengan jari (tinta hitam). |
-| 🖍️ **Mewarnai** | Gambar besar acak + contoh kecil berwarna di pojok kanan atas | Warnai bebas, 16 warna krayon. Garis tepi tetap rapi di atas coretan. |
-| 🦁 **Melengkapi** | Separuh kiri gambar di atas grid kotak bantu + contoh utuh di pojok kanan atas | Gambar separuh kanannya, lalu warnai sesukanya. |
+| 🖍️ **Mewarnai** | Shape vektor acak + contoh kecil berwarna di pojok kanan atas | Warnai bebas, 16 warna krayon. Garis tepi tetap rapi di atas coretan. |
+| 🦁 **Melengkapi** | Separuh kiri shape di atas grid kotak bantu + contoh utuh di pojok kanan atas | Gambar separuh kanannya, lalu warnai sesukanya. |
 | ⚖️ **Perbandingan** | 4 baris benda dengan ukuran berbeda | Tap yang *paling/lebih besar* atau *kecil* (satu pertanyaan per lembar). |
 | 📝 **Menulis** | Gambar benda + namanya dalam huruf putus-putus | Tebalkan hurufnya (tinta hitam). |
-| 🐰 **Menggambar** | Shape atau gambar besar dalam garis putus-putus + contoh kecil di pojok kanan atas | Tebalkan garisnya, lalu warnai sesukanya. |
+| 🐰 **Menggambar** | Shape dalam garis putus-putus + contoh kecil di pojok kanan atas | Tebalkan garisnya, lalu warnai sesukanya. |
 
 ## 🧱 Teknologi
 
 - [Expo SDK 58](https://docs.expo.dev/) + [Expo Router](https://docs.expo.dev/router/introduction/) (routing berbasis file di `src/app/`)
 - React Native 0.88, React 19, TypeScript
-- [`react-native-svg`](https://github.com/software-mansion/react-native-svg): 100% shape, gambar besar, dan garis digambar dengan vektor SVG (tanpa file gambar raster)
+- [`react-native-svg`](https://github.com/software-mansion/react-native-svg): 100% shape dan garis digambar dengan vektor SVG (tanpa file gambar raster)
 
 ## 📁 Struktur proyek
 
@@ -58,11 +58,10 @@ src/
 │   ├── cari-jalan.tsx   # Tiap kategori permainan punya layar sendiri
 │   ├── coding.tsx  berhitung.tsx  memasangkan.tsx  perbandingan.tsx
 │   ├── menggaris.tsx  mewarnai.tsx  melengkapi.tsx  menulis.tsx  menggambar.tsx
-│   └── katalog-shape.tsx                        # Katalog semua shape & gambar besar
+│   └── katalog-shape.tsx                        # Katalog semua shape
 ├── components/          # Komponen permainan (MazeGame, MatchGame, CountGame, DrawingSheet, ...)
 ├── data/                # Daftar kategori + generator soal acak tiap permainan
-├── shapes/              # Koleksi shape kecil, 1 file per kelompok (buah, hewan, ...)
-├── drawings/            # Koleksi gambar besar yang terdiri dari beberapa bagian bernomor
+├── shapes/              # Koleksi shape vektor, 1 file per kelompok (buah, hewan, ...)
 └── lines/               # Koleksi pola garis (lurus, gelombang, zigzag, ...)
 assets/
 └── icon.png, android-icon-*.png, splash-icon.png
@@ -151,12 +150,11 @@ Semua konten digambar dengan SVG lewat kode, jadi menambah konten tidak perlu fi
 
 | Mau menambah | Caranya |
 |---|---|
-| **Shape** (benda kecil) | Tambah entri di file kelompoknya di `src/shapes/` (petunjuk di `kit.tsx`). Otomatis dipakai Memasangkan, Perbandingan, Berhitung, Menggambar, Melengkapi, dan Menulis. Isi `code` agar bisa dipakai di Coding. |
-| **Gambar besar** | Buat file baru di `src/drawings/` dari region bernomor (petunjuk di `kit.ts`), lalu daftarkan di `index.tsx`. Otomatis dipakai Coding, Mewarnai, Menggambar, dan Melengkapi. |
+| **Shape** | Tambah entri di file kelompoknya di `src/shapes/` (petunjuk di `kit.tsx`). Otomatis dipakai Memasangkan, Perbandingan, Berhitung, Coding, Mewarnai, Menggambar, Melengkapi, dan Menulis. |
 | **Pola garis** | Tambah fungsi di `LINE_PATTERNS` (`src/lines/index.ts`). |
 
-Untuk melihat semua shape (beserta bayangan & garis putus-putusnya) dan gambar besar (beserta nomornya),
-tekan tombol **🎨 Lihat Katalog Shape & Gambar** di bagian paling bawah Beranda.
+Untuk melihat semua shape (warna asli, garis putus-putus, angka coding, dan bayangannya),
+tekan tombol **🎨 Lihat Katalog** di bagian paling bawah Beranda.
 
 ## 🙏 Sumber gambar
 

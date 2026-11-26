@@ -10,9 +10,22 @@ function goHome() {
   else router.replace('/');
 }
 
-/** Kerangka layar permainan acak: header berwarna, isi, dan tombol Home + Acak di bawah. */
-export function GameScreen({ cat, shuffleLabel, onShuffle, children }: { cat: Category; shuffleLabel: string; onShuffle: () => void; children: ReactNode }) {
+/** Kerangka layar permainan acak: header berwarna, isi, dan tombol Home + Acak/Main Lagi di bawah. */
+export function GameScreen({
+  cat,
+  shuffleLabel,
+  done = false,
+  onShuffle,
+  children,
+}: {
+  cat: Category;
+  shuffleLabel: string;
+  done?: boolean;
+  onShuffle: () => void;
+  children: ReactNode;
+}) {
   const insets = useSafeAreaInsets();
+  const btnColor = done ? '#43A047' : cat.color;
   return (
     <>
       <Stack.Screen
@@ -32,8 +45,8 @@ export function GameScreen({ cat, shuffleLabel, onShuffle, children }: { cat: Ca
         >
           <Text style={styles.homeText}>🏠</Text>
         </Pressable>
-        <Pressable onPress={onShuffle} style={({ pressed }) => [styles.shuffle, { backgroundColor: cat.color }, pressed && { opacity: 0.8 }]}>
-          <Text style={styles.shuffleText}>🔀 {shuffleLabel}</Text>
+        <Pressable onPress={onShuffle} style={({ pressed }) => [styles.shuffle, { backgroundColor: btnColor }, pressed && { opacity: 0.8 }]}>
+          <Text style={styles.shuffleText}>{done ? '🎉 Main Lagi' : `🔀 ${shuffleLabel}`}</Text>
         </Pressable>
       </View>
     </>

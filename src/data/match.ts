@@ -18,7 +18,29 @@ export type MatchRound = {
   answer: number[];
 };
 
-export const MATCH_COLORS = ['#EF5350', '#FFA726', '#FFEE58', '#66BB6A', '#42A5F5', '#AB47BC', '#F06292', '#8D6E63'];
+export const MATCH_COLORS: { hex: string; family: string }[] = [
+  { hex: '#E53935', family: 'warm-red' },
+  { hex: '#F48FB1', family: 'warm-red' },
+  { hex: '#FFEB3B', family: 'warm-yellow' },
+  { hex: '#FB8C00', family: 'warm-yellow' },
+  { hex: '#43A047', family: 'green' },
+  { hex: '#1E88E5', family: 'blue' },
+  { hex: '#8E24AA', family: 'purple' },
+  { hex: '#795548', family: 'brown' },
+];
+
+/** Ambil `n` warna yang benar-benar kontras (tidak mencampur merah↔pink atau kuning↔oranye dalam satu halaman). */
+function sampleDistinctColors(n: number): string[] {
+  const out: string[] = [];
+  const used = new Set<string>();
+  for (const c of shuffle(MATCH_COLORS)) {
+    if (used.has(c.family)) continue;
+    used.add(c.family);
+    out.push(c.hex);
+    if (out.length === n) break;
+  }
+  return out;
+}
 
 const PAIRS: [ShapeKind, ShapeKind][] = [
   ['kaos', 'celana'],
@@ -67,7 +89,7 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
   switch (mode) {
     case 'pasangan': {
       const [a, b] = pick(PAIRS);
-      const colors = sample(MATCH_COLORS, ROWS);
+      const colors = sampleDistinctColors(ROWS);
       return {
         prompt: `Pasangkan ${shapeDef(a).name} dengan ${shapeDef(b).name} yang warnanya sama!`,
         pairs: colors.map((color) => [
@@ -87,7 +109,7 @@ function makePairs(mode: MatchMode): { prompt: string; pairs: [MatchItem, MatchI
     }
     case 'warna': {
       const kinds = sample(RECOLOR_KINDS, ROWS);
-      const colors = sample(MATCH_COLORS, ROWS);
+      const colors = sampleDistinctColors(ROWS);
       return {
         prompt: 'Tarik garis ke warna yang sama!',
         pairs: kinds.map((kind, i) => [

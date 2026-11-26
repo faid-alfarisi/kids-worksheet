@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { GestureResponderEvent, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GestureResponderEvent, LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import type { MatchItem, MatchRound } from '../data/match';
 import { ColorDot, Shape } from '../shapes';
@@ -23,7 +23,7 @@ const LAYOUT = {
  * Permainan memasangkan: tarik garis lurus dari titik di kiri ke titik di kanan (atau sebaliknya).
  * Benar → garis hijau menetap. Salah → garis merah lalu hilang sendiri, anak bisa coba lagi.
  */
-export function MatchGame({ round, color, onShuffle }: { round: MatchRound; color: string; onShuffle: () => void }) {
+export function MatchGame({ round, color, onDone }: { round: MatchRound; color: string; onDone?: () => void }) {
   const rows = round.left.length;
   const [area, setArea] = useState({ w: 0, h: 0 });
   const [matched, setMatched] = useState<Record<number, number>>({}); // kiri -> kanan
@@ -42,6 +42,10 @@ export function MatchGame({ round, color, onShuffle }: { round: MatchRound; colo
   const rightUsed = new Set(Object.values(matched));
   const isUsed = (s: Side, i: number) => (s === 'L' ? i in matched : rightUsed.has(i));
   const done = Object.keys(matched).length === rows;
+
+  useEffect(() => {
+    if (done) onDone?.();
+  }, [done, onDone]);
 
   const rowAt = (y: number) => Math.max(0, Math.min(rows - 1, Math.floor(y / rowH)));
 
@@ -97,10 +101,12 @@ export function MatchGame({ round, color, onShuffle }: { round: MatchRound; colo
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.prompt}>{round.prompt}</Text>
+      <View style={[styles.promptBox, done && styles.promptWin]}>
+        <Text style={[styles.prompt, done && styles.promptWinText]}>{done ? '🎉 Hebat! Semua benar!' : round.prompt}</Text>
+      </View>
 
       <View
-        style={[styles.board, { borderColor: color }]}
+        style={[styles.board, { borderColor: done ? GREEN : color }]}
         onLayout={onLayout}
         onStartShouldSetResponder={() => !done}
         onMoveShouldSetResponder={() => !done}
@@ -147,15 +153,6 @@ export function MatchGame({ round, color, onShuffle }: { round: MatchRound; colo
           </View>
         )}
       </View>
-
-      {done && (
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>🎉 Hebat! Semua benar!</Text>
-          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: color }]}>
-            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 }
@@ -188,14 +185,13 @@ const DOT_SIZE = 20;
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, padding: 14, gap: 10 },
+  promptBox: { borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  promptWin: { backgroundColor: GREEN },
   prompt: { fontSize: 16, color: '#444', fontWeight: '700', textAlign: 'center' },
+  promptWinText: { color: '#fff', fontSize: 19, fontWeight: '900' },
   board: { flex: 1, backgroundColor: '#fff', borderRadius: 18, borderWidth: 3 },
   cell: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   dot: { position: 'absolute', width: DOT_SIZE, height: DOT_SIZE, borderRadius: DOT_SIZE / 2, borderWidth: 3, borderColor: '#fff', elevation: 2 },
   number: { fontWeight: '900', color: '#37474F' },
   group: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-  banner: { borderRadius: 14, padding: 12, alignItems: 'center', gap: 10, backgroundColor: '#E8F5E9' },
-  bannerText: { fontSize: 17, fontWeight: '800', color: '#333' },
-  bigBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 14 },
-  bigBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

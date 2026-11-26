@@ -1,7 +1,7 @@
 import { type ReactNode, useRef, useState } from 'react';
 import { LayoutChangeEvent, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { DrawingArt, type DrawingDef } from '../drawings';
+import { Shape, type ShapeKind } from '../shapes';
 
 // Dua baris krayon: warna cerah di atas, warna lembut/netral di bawah (putih bisa jadi penghapus).
 const CRAYON_ROWS = [
@@ -18,21 +18,21 @@ export type CustomPage = { ratio: number; render: (w: number, h: number) => Reac
 
 /**
  * Kanvas coret-coret (pakai jari) di atas salah satu latar:
- *  - `art`: gambar besar (drawing); garis tepinya digambar DI ATAS coretan supaya tetap rapi,
- *  - `page`: halaman buatan sendiri (mis. lembar menulis, menggaris, melengkapi).
+ *  - `shape`: satu shape besar untuk diwarnai; garis tepinya digambar DI ATAS coretan supaya tetap rapi,
+ *  - `page`: halaman buatan sendiri (mis. lembar menulis, menggaris, melengkapi, menggambar).
  * `preview` = kartu contoh kecil di pojok kanan atas kertas (tidak ikut tercoret).
  * `ink` = satu warna tetap (pemilih warna disembunyikan), mis. hitam untuk menulis.
  * `startColor` = warna awal krayon (pemilih warna tetap tampil).
  */
 export function DrawingSheet({
-  art,
+  shape,
   page,
   preview,
   ink,
   startColor,
   color: accent,
 }: {
-  art?: DrawingDef;
+  shape?: ShapeKind;
   page?: CustomPage;
   preview?: ReactNode;
   ink?: string;
@@ -93,10 +93,22 @@ export function DrawingSheet({
 
   return (
     <View style={styles.wrap}>
+      {preview && (
+        <View style={styles.previewBar}>
+          <Text style={styles.previewLabel}>Contoh:</Text>
+          <View style={[styles.previewCard, { borderColor: accent }]}>{preview}</View>
+        </View>
+      )}
       <View style={styles.stage} onLayout={onLayout}>
         {box.w > 0 && (
           <View style={[styles.paper, { width: box.w, height: box.h }]}>
-            {page ? page.render(box.w, box.h) : art ? <DrawingArt def={art} size={box.w} layer="fill" /> : null}
+            {page ? (
+              page.render(box.w, box.h)
+            ) : shape ? (
+              <View style={styles.center}>
+                <Shape kind={shape} size={box.w * 0.84} lineOnly />
+              </View>
+            ) : null}
             <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
               {/* pointerEvents none: sentuhan selalu jatuh ke View induk, jadi locationX/Y konsisten */}
               <Svg width={box.w} height={box.h} pointerEvents="none">
@@ -108,14 +120,9 @@ export function DrawingSheet({
                 )}
               </Svg>
             </View>
-            {art && (
-              <View style={StyleSheet.absoluteFill} pointerEvents="none">
-                <DrawingArt def={art} size={box.w} layer="line" />
-              </View>
-            )}
-            {preview && (
-              <View style={[styles.previewCard, { borderColor: accent }]} pointerEvents="none">
-                {preview}
+            {shape && (
+              <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
+                <Shape kind={shape} size={box.w * 0.84} strokeOnly />
               </View>
             )}
           </View>
@@ -161,6 +168,7 @@ function ToolButton({ label, onPress }: { label: string; onPress: () => void }) 
 const styles = StyleSheet.create({
   wrap: { flex: 1 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   paper: {
     backgroundColor: '#fff',
     borderRadius: 6,
@@ -171,10 +179,16 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
   },
+  previewBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    gap: 8,
+  },
+  previewLabel: { fontSize: 13, fontWeight: '800', color: '#546E7A' },
   previewCard: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
     backgroundColor: '#FFFDF7',
     borderRadius: 12,
     borderWidth: 2,

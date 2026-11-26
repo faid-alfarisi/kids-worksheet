@@ -11,7 +11,7 @@ const WRONG_MS = 900;
  * Perbandingan ukuran: tiap baris berisi benda yang sama dengan ukuran berbeda.
  * Tap yang benar → dilingkari hijau. Salah → lingkaran merah lalu hilang, boleh coba lagi.
  */
-export function CompareGame({ round, color, onShuffle }: { round: CompareRound; color: string; onShuffle: () => void }) {
+export function CompareGame({ round, color, onDone }: { round: CompareRound; color: string; onDone?: () => void }) {
   const [area, setArea] = useState({ w: 0, h: 0 });
   const [solved, setSolved] = useState<Record<number, boolean>>({});
   const [wrong, setWrong] = useState<{ row: number; idx: number } | null>(null);
@@ -23,6 +23,10 @@ export function CompareGame({ round, color, onShuffle }: { round: CompareRound; 
 
   const rows = round.rows.length;
   const done = Object.keys(solved).length === rows;
+
+  useEffect(() => {
+    if (done) onDone?.();
+  }, [done, onDone]);
 
   const tap = (row: number, idx: number) => {
     if (solved[row]) return;
@@ -45,12 +49,12 @@ export function CompareGame({ round, color, onShuffle }: { round: CompareRound; 
 
   return (
     <View style={styles.wrap}>
-      <View style={[styles.question, { backgroundColor: color }]}>
-        <Text style={styles.questionIcon}>{isBig ? '🐘' : '🐭'}</Text>
-        <Text style={styles.questionText}>{round.prompt}</Text>
+      <View style={[styles.question, { backgroundColor: done ? GREEN : color }]}>
+        <Text style={styles.questionIcon}>{done ? '🎉' : isBig ? '🐘' : '🐭'}</Text>
+        <Text style={styles.questionText}>{done ? 'Hebat! Semua benar!' : round.prompt}</Text>
       </View>
 
-      <View style={[styles.board, { borderColor: color }]} onLayout={onLayout}>
+      <View style={[styles.board, { borderColor: done ? GREEN : color }]} onLayout={onLayout}>
         {area.w > 0 &&
           round.rows.map((r, i) => (
             <View key={i} style={[styles.row, { height: rowH }, i > 0 && styles.divider]}>
@@ -71,15 +75,6 @@ export function CompareGame({ round, color, onShuffle }: { round: CompareRound; 
             </View>
           ))}
       </View>
-
-      {done && (
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>🎉 Hebat! Semua benar!</Text>
-          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: color }]}>
-            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
-          </Pressable>
-        </View>
-      )}
     </View>
   );
 }

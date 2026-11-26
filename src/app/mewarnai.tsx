@@ -2,26 +2,25 @@ import { useState } from 'react';
 import { DrawingSheet } from '../components/DrawingSheet';
 import { GameScreen } from '../components/GameScreen';
 import { getCategory } from '../data/categories';
-import { DrawingArt, DRAWING_IDS, DRAWINGS, type DrawingId, sampleDrawingFills } from '../drawings';
+import { Shape, SHAPE_KINDS, type ShapeKind } from '../shapes';
 
-function randomPick(previous?: DrawingId): DrawingId {
-  const options = previous ? DRAWING_IDS.filter((id) => id !== previous) : DRAWING_IDS;
+function randomPick(previous?: ShapeKind): ShapeKind {
+  const options = previous ? SHAPE_KINDS.filter((k) => k !== previous) : SHAPE_KINDS;
   return options[Math.floor(Math.random() * options.length)];
 }
 
-/** Mewarnai bebas: gambar besar vektor acak + contoh kecil berwarna di pojok kanan atas. */
+/** Mewarnai bebas: shape vektor acak + contoh kecil berwarna di pojok kanan atas. Garis tepi selalu rapi di atas coretan. */
 export default function MewarnaiScreen() {
   const cat = getCategory('mewarnai')!;
   const [state, setState] = useState(() => ({ id: 0, pick: randomPick() }));
   const shuffle = () => setState((s) => ({ id: s.id + 1, pick: randomPick(s.pick) }));
-  const def = DRAWINGS[state.pick];
 
   return (
     <GameScreen cat={cat} shuffleLabel="Acak Gambar Baru" onShuffle={shuffle}>
       <DrawingSheet
         key={state.id}
-        art={def}
-        preview={<DrawingArt def={def} size={64} fills={sampleDrawingFills(def)} />}
+        shape={state.pick}
+        preview={<Shape kind={state.pick} size={60} />}
         color={cat.color}
       />
     </GameScreen>

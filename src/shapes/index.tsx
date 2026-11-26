@@ -2,14 +2,16 @@ import Svg, { Circle, Ellipse } from 'react-native-svg';
 import { BUAH } from './buah';
 import { DINOSAURUS } from './dinosaurus';
 import { HEWAN } from './hewan';
-import { drawLineOnly, drawTraced, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
+import { drawLineOnly, drawStrokeOnly, drawTraced, hitShapeEl, OUTLINE, SHADOW, type ShapeDef, TRACE_PAINT } from './kit';
 import { LAINNYA } from './lainnya';
 import { SAYUR } from './sayur';
 import { SEKOLAH } from './sekolah';
 import { TRANSPORTASI } from './transportasi';
 
+export { hitShapeEl };
+
 /**
- * Koleksi shape bersama untuk semua permainan (Memasangkan, Perbandingan, ...).
+ * Koleksi shape bersama untuk semua permainan (Memasangkan, Perbandingan, Coding, Mewarnai, ...).
  * Shape dikelompokkan per kategori; tambah shape di file kelompoknya (lihat petunjuk di kit.tsx).
  */
 export const SHAPE_GROUPS = {
@@ -40,14 +42,22 @@ export const SHAPE_KINDS = Object.keys(SHAPES) as ShapeKind[];
 /** Shape yang boleh diwarnai bebas (untuk soal warna). */
 export const RECOLOR_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).recolor);
 
-/** Shape yang punya letak angka (untuk soal Coding/kode warna). */
+/** Shape yang punya letak angka (untuk soal Coding 6 benda kecil). */
 export const CODE_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).code);
+
+/** Shape yang punya beberapa bagian bernomor (untuk soal Coding 1 Gambar Besar multi-warna). */
+export const MULTI_CODE_KINDS = SHAPE_KINDS.filter((k) => (SHAPES[k] as ShapeDef).els?.some((e) => e.n));
+
+/** Banyaknya kelompok warna dalam satu shape multi-warna. */
+export const shapeGroupCount = (kind: ShapeKind) =>
+  Math.max(1, ...(shapeDef(kind).els ?? []).map((e) => e.n ?? 0));
 
 export const shapeDef = (kind: ShapeKind): ShapeDef => SHAPES[kind];
 
 /**
  * Gambar satu shape. Tanpa `color` → warna aslinya. `silhouette` → bayangan hitam polos.
- * `trace` → hanya garis putus-putus berisi putih (untuk ditebalkan), tanpa detail kecil.
+ * `trace` → hanya garis putus-putus berisi putih (untuk ditebalkan).
+ * `partFills` → warna per bagian elemen untuk mode Coding Gambar Besar.
  */
 export function Shape({
   kind,
@@ -56,6 +66,8 @@ export function Shape({
   silhouette = false,
   trace = false,
   lineOnly = false,
+  strokeOnly = false,
+  partFills,
 }: {
   kind: ShapeKind;
   color?: string;
@@ -63,12 +75,22 @@ export function Shape({
   silhouette?: boolean;
   trace?: boolean;
   lineOnly?: boolean;
+  strokeOnly?: boolean;
+  partFills?: Record<number, string>;
 }) {
   const def = shapeDef(kind);
   if (trace) {
     return (
       <Svg width={size} height={size} viewBox="0 0 100 100">
         {drawTraced(() => def.draw(TRACE_PAINT, true))}
+      </Svg>
+    );
+  }
+  if (strokeOnly) {
+    const strokePaint = { fill: 'none', stroke: OUTLINE, strokeWidth: 3, strokeLinejoin: 'round' as const };
+    return (
+      <Svg width={size} height={size} viewBox="0 0 100 100">
+        {drawStrokeOnly(() => def.draw(strokePaint, false))}
       </Svg>
     );
   }
@@ -88,7 +110,7 @@ export function Shape({
   };
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
-      {def.draw(paint, silhouette)}
+      {def.draw(paint, silhouette, partFills)}
     </Svg>
   );
 }

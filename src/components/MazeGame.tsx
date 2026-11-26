@@ -10,7 +10,7 @@ const DIRS: Dir[] = ['left', 'up', 'down', 'right'];
  * Coding untuk anak: susun urutan panah, tekan "Jalankan", robot bergerak satu per satu.
  * Sampai di bintang = menang; menabrak batu/keluar papan = coba lagi.
  */
-export function MazeGame({ level, color, onShuffle }: { level: Level; color: string; onShuffle: () => void }) {
+export function MazeGame({ level, color, onDone }: { level: Level; color: string; onDone?: () => void }) {
   const info = useMemo(() => parseLevel(level), [level]);
   const maxCmds = info.shortest + 4;
   const [cmds, setCmds] = useState<Dir[]>([]);
@@ -22,6 +22,10 @@ export function MazeGame({ level, color, onShuffle }: { level: Level; color: str
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
   }, []);
+
+  useEffect(() => {
+    if (status === 'win') onDone?.();
+  }, [status, onDone]);
 
   const reset = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -68,9 +72,17 @@ export function MazeGame({ level, color, onShuffle }: { level: Level; color: str
 
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
-      <Text style={styles.hint}>Bantu robot 🤖 sampai ke bintang ⭐ ! Susun panahnya, lalu tekan Jalankan.</Text>
+      <View style={[styles.hintBox, status === 'win' && styles.hintWin, status === 'fail' && styles.hintFail]}>
+        <Text style={[styles.hint, status === 'win' && styles.hintWinText]}>
+          {status === 'win'
+            ? '🎉 Hebat! Robot sampai ke bintang!'
+            : status === 'fail'
+              ? 'Ups! Belum sampai. Coba lagi ya 💪'
+              : 'Bantu robot 🤖 sampai ke bintang ⭐ ! Susun panahnya, lalu tekan Jalankan.'}
+        </Text>
+      </View>
 
-      <View style={[styles.board, { borderColor: color }]}>
+      <View style={[styles.board, { borderColor: status === 'win' ? '#43A047' : color }]}>
         {level.map.map((row, r) => (
           <View key={r} style={styles.row}>
             {row.split('').map((ch, c) => {
@@ -87,20 +99,6 @@ export function MazeGame({ level, color, onShuffle }: { level: Level; color: str
           </View>
         ))}
       </View>
-
-      {status === 'win' && (
-        <View style={[styles.banner, { backgroundColor: '#E8F5E9' }]}>
-          <Text style={styles.bannerText}>🎉 Hebat! Robot sampai ke bintang!</Text>
-          <Pressable onPress={onShuffle} style={[styles.bigBtn, { backgroundColor: color }]}>
-            <Text style={styles.bigBtnText}>🔀 Main lagi</Text>
-          </Pressable>
-        </View>
-      )}
-      {status === 'fail' && (
-        <View style={[styles.banner, { backgroundColor: '#FFEBEE' }]}>
-          <Text style={styles.bannerText}>Ups! Belum sampai. Coba lagi ya 💪</Text>
-        </View>
-      )}
 
       <Text style={styles.label}>
         Perintah ({cmds.length}/{maxCmds})
@@ -139,7 +137,11 @@ export function MazeGame({ level, color, onShuffle }: { level: Level; color: str
 
 const styles = StyleSheet.create({
   wrap: { padding: 14, gap: 10, alignItems: 'stretch' },
+  hintBox: { borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  hintWin: { backgroundColor: '#43A047' },
+  hintFail: { backgroundColor: '#FFEBEE' },
   hint: { fontSize: 15, color: '#444', fontWeight: '600', textAlign: 'center' },
+  hintWinText: { color: '#fff', fontSize: 17, fontWeight: '900' },
   board: { alignSelf: 'center', width: '88%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 18, borderWidth: 3, padding: 8, gap: 6 },
   row: { flexDirection: 'row', gap: 6 },
   cell: { flex: 1, aspectRatio: 1, borderRadius: 10, backgroundColor: '#F4F1FF', alignItems: 'center', justifyContent: 'center' },

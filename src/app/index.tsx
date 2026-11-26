@@ -1,10 +1,27 @@
-import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CATEGORIES } from '../data/categories';
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const [navTarget, setNavTarget] = useState<string | null>(null);
+  const busy = navTarget !== null;
+
+  useFocusEffect(
+    useCallback(() => {
+      setNavTarget(null);
+    }, []),
+  );
+
+  const open = (target: string, go: () => void) => {
+    if (busy) return;
+    setNavTarget(target);
+    // Beri 1 frame agar spinner/state disabled sempat tampil sebelum navigasi.
+    requestAnimationFrame(go);
+  };
+
   return (
     <FlatList
       data={CATEGORIES}
@@ -13,16 +30,30 @@ export default function Home() {
       ListHeaderComponent={<Text style={styles.hello}>Mau belajar apa hari ini? 👋</Text>}
       ListFooterComponent={
         <Pressable
-          onPress={() => router.push('/katalog-shape')}
-          style={({ pressed }) => [styles.katalogBtn, pressed && styles.pressed]}
+          disabled={busy}
+          onPress={() => open('katalog', () => router.push('/katalog-shape'))}
+          style={({ pressed }) => [styles.katalogBtn, busy && styles.disabled, pressed && styles.pressed]}
         >
-          <Text style={styles.katalogText}>🎨 Lihat Katalog Shape & Gambar</Text>
+          {navTarget === 'katalog' ? (
+            <View style={styles.katalogRow}>
+              <ActivityIndicator size="small" color="#546E7A" />
+              <Text style={styles.katalogText}>Membuka Katalog…</Text>
+            </View>
+          ) : (
+            <Text style={styles.katalogText}>🎨 Lihat Katalog</Text>
+          )}
         </Pressable>
       }
       renderItem={({ item }) => (
         <Pressable
-          onPress={() => router.push(item.route)}
-          style={({ pressed }) => [styles.card, { backgroundColor: item.soft, borderColor: item.color }, pressed && styles.pressed]}
+          disabled={busy}
+          onPress={() => open(item.id, () => router.push(item.route))}
+          style={({ pressed }) => [
+            styles.card,
+            { backgroundColor: item.soft, borderColor: item.color },
+            busy && styles.disabled,
+            pressed && styles.pressed,
+          ]}
         >
           <View style={[styles.badge, { backgroundColor: item.color }]}>
             <Text style={styles.emoji}>{item.emoji}</Text>
@@ -48,6 +79,7 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 14,
   },
+  disabled: { opacity: 0.6 },
   pressed: { transform: [{ scale: 0.97 }], opacity: 0.9 },
   badge: { width: 64, height: 64, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   emoji: { fontSize: 34 },
@@ -64,5 +96,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F7F8',
     alignItems: 'center',
   },
+  katalogRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   katalogText: { fontSize: 14, fontWeight: '800', color: '#546E7A' },
 });
