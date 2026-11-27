@@ -3,8 +3,10 @@ import { CODE_KINDS, MULTI_CODE_KINDS, shapeDef, shapeGroupCount, type ShapeKind
 export type CodeColor = { name: string; hex: string; /** Grup warna mirip; maks. 1 warna per grup dalam satu soal. */ family: string };
 
 export type CodeRound = {
-  /** Legenda: angka i+1 = colors[i]. */
+  /** Legenda: kode labels[i] = colors[i]. */
   colors: CodeColor[];
+  /** Label kode di legenda & gambar: acak antara angka ('1','2',...) atau huruf ('A','B',...). */
+  labels: string[];
 } & (
   | {
       /** 6 benda (shape) berbeda, tiap benda punya 1 angka (1-based). */
@@ -67,6 +69,12 @@ function pickDistinctColors(n: number): CodeColor[] {
   return out;
 }
 
+/** Buat label kode acak: angka ('1','2',...) atau huruf ('A','B',...). */
+function randomLabels(n: number): string[] {
+  const useLetters = Math.random() < 0.5;
+  return Array.from({ length: n }, (_, i) => (useLetters ? String.fromCharCode(65 + i) : String(i + 1)));
+}
+
 /**
  * Soal kode warna acak. Kadang berupa 6 shape kecil (1 warna per shape),
  * kadang berupa 1 shape besar multi-warna (payung, bunga, rumah, kapal, mobil, kereta, bebek, dll.).
@@ -78,12 +86,12 @@ export function randomCodeRound(previous?: CodeRound): CodeRound {
     const count = shapeGroupCount(kind);
     const colors = pickDistinctColors(count);
     const groupNumbers = shuffle(Array.from({ length: count }, (_, i) => i + 1));
-    return { type: 'bigShape', kind, colors, groupNumbers };
+    return { type: 'bigShape', kind, colors, labels: randomLabels(count), groupNumbers };
   }
   const k = Math.random() < 0.5 ? 3 : 4;
   const colors = pickDistinctColors(k);
-  // Pastikan semua angka terpakai minimal sekali, sisanya acak.
+  // Pastikan semua kode terpakai minimal sekali, sisanya acak.
   const numbers = shuffle([...colors.map((_, i) => i + 1), ...Array.from({ length: ITEMS - k }, () => 1 + Math.floor(Math.random() * k))]);
   const kinds = shuffle(CODE_KINDS).slice(0, ITEMS);
-  return { type: 'shapes', colors, items: kinds.map((kind, i) => ({ kind, number: numbers[i] })) };
+  return { type: 'shapes', colors, labels: randomLabels(k), items: kinds.map((kind, i) => ({ kind, number: numbers[i] })) };
 }

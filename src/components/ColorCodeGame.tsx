@@ -68,7 +68,7 @@ export function ColorCodeGame({ round, color: accent, onDone }: { round: CodeRou
           {round.colors.map((c, i) => (
             <View key={c.hex} style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: c.hex }]}>
-                <Text style={styles.legendNum}>{i + 1}</Text>
+                <Text style={styles.legendNum}>{round.labels[i]}</Text>
               </View>
             </View>
           ))}
@@ -83,6 +83,7 @@ export function ColorCodeGame({ round, color: accent, onDone }: { round: CodeRou
               kind={round.kind}
               size={Math.min(area.w, area.h) * 0.9}
               colors={round.colors.map((c) => c.hex)}
+              labels={round.labels}
               groupNumbers={round.groupNumbers}
               painted={painted}
               wrong={wrong}
@@ -95,7 +96,7 @@ export function ColorCodeGame({ round, color: accent, onDone }: { round: CodeRou
               <View key={i} style={[styles.cell, { width: area.w / cols, height: area.h / rows }]}>
                 <CodeItem
                   kind={item.kind}
-                  number={item.number}
+                  label={round.labels[item.number - 1]}
                   fill={painted[i] ? round.colors[item.number - 1].hex : null}
                   wrong={wrong === i}
                   size={size}
@@ -135,6 +136,7 @@ function BigShapeBoard({
   kind,
   size,
   colors,
+  labels,
   groupNumbers,
   painted,
   wrong,
@@ -143,6 +145,7 @@ function BigShapeBoard({
   kind: ShapeKind;
   size: number;
   colors: string[];
+  labels: string[];
   groupNumbers: number[];
   painted: Record<number, boolean>;
   wrong: number | null;
@@ -209,7 +212,7 @@ function BigShapeBoard({
             ]}
           >
             <Text style={[styles.badgeText, { fontSize: badge * 0.68 }, isWrong && styles.badgeWrong]}>
-              {isWrong ? '✕' : num}
+              {isWrong ? '✕' : labels[num - 1]}
             </Text>
           </Pressable>
         );
@@ -218,8 +221,8 @@ function BigShapeBoard({
   );
 }
 
-/** Satu benda berangka. Bergoyang sebentar saat jawaban salah. */
-function CodeItem({ kind, number, fill, wrong, size, onPress }: { kind: ShapeKind; number: number; fill: string | null; wrong: boolean; size: number; onPress: () => void }) {
+/** Satu benda berkode. Bergoyang sebentar saat jawaban salah. */
+function CodeItem({ kind, label, fill, wrong, size, onPress }: { kind: ShapeKind; label: string; fill: string | null; wrong: boolean; size: number; onPress: () => void }) {
   const [shake] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
@@ -241,7 +244,7 @@ function CodeItem({ kind, number, fill, wrong, size, onPress }: { kind: ShapeKin
             pointerEvents="none"
             style={[styles.badge, { width: badge, height: badge, left: (pos.x / 100) * size - badge / 2, top: (pos.y / 100) * size - badge / 2 }]}
           >
-            <Text style={[styles.badgeText, { fontSize: badge * 0.8 }, wrong && styles.badgeWrong]}>{wrong ? '✕' : number}</Text>
+            <Text style={[styles.badgeText, { fontSize: badge * 0.8 }, wrong && styles.badgeWrong]}>{wrong ? '✕' : label}</Text>
           </View>
         )}
       </Animated.View>

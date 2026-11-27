@@ -202,9 +202,10 @@ export default function KatalogShape() {
       />
 
       <Modal visible={selected !== null} transparent animationType="fade" onRequestClose={closeModal}>
-        <Pressable style={styles.backdrop} onPress={closeModal}>
+        <View style={styles.backdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={closeModal} />
           {selected && selectedDef && (
-            <Pressable style={[styles.modalCard, { width: modalW }]} onPress={() => {}}>
+            <View style={[styles.modalCard, { width: modalW }]}>
               {/* Header modal */}
               <View style={styles.modalHeader}>
                 <View style={styles.modalTitleWrap}>
@@ -243,6 +244,7 @@ export default function KatalogShape() {
                 ref={pagerRef}
                 horizontal
                 pagingEnabled
+                nestedScrollEnabled
                 showsHorizontalScrollIndicator={false}
                 onMomentumScrollEnd={onMomentumEnd}
                 style={{ width: slideW }}
@@ -265,9 +267,11 @@ export default function KatalogShape() {
                   </View>
                   <Text style={styles.slideHint}>
                     {isMulti
-                      ? `Titik Coding: ${multiTargets.length} bagian (${groupCount} kelompok, angka diacak saat main)`
+                      ? multiTargets.length === groupCount
+                        ? `Titik Coding: ${multiTargets.length} bagian`
+                        : `Titik Coding: ${multiTargets.length} bagian (${groupCount} warna)`
                       : selectedDef.code
-                        ? `Titik Coding 1-warna: [${selectedDef.code.x}, ${selectedDef.code.y}] (angka diacak saat main)`
+                        ? `Titik Coding: [${selectedDef.code.x}, ${selectedDef.code.y}]`
                         : 'Tidak dipakai di mode Coding'}
                   </Text>
                 </View>
@@ -303,9 +307,9 @@ export default function KatalogShape() {
                   <Text style={styles.navBtnText}>Berikutnya ›</Text>
                 </Pressable>
               </View>
-            </Pressable>
+            </View>
           )}
-        </Pressable>
+        </View>
       </Modal>
     </>
   );
