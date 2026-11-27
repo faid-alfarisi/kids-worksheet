@@ -83,6 +83,7 @@ export function ColorCodeGame({ round, color: accent, onDone }: { round: CodeRou
               kind={round.kind}
               size={Math.min(area.w, area.h) * 0.9}
               colors={round.colors.map((c) => c.hex)}
+              groupNumbers={round.groupNumbers}
               painted={painted}
               wrong={wrong}
               onTap={tapItem}
@@ -134,6 +135,7 @@ function BigShapeBoard({
   kind,
   size,
   colors,
+  groupNumbers,
   painted,
   wrong,
   onTap,
@@ -141,6 +143,7 @@ function BigShapeBoard({
   kind: ShapeKind;
   size: number;
   colors: string[];
+  groupNumbers: number[];
   painted: Record<number, boolean>;
   wrong: number | null;
   onTap: (targetIdx: number) => void;
@@ -152,19 +155,21 @@ function BigShapeBoard({
     .filter((t) => t.el.n && t.el.at);
 
   // Hitung warna untuk setiap elemen di `els`:
-  // - jika elemen itu sendiri punya target yang sudah painted -> warnai
-  // - jika elemen punya `n` tanpa `at` (elemen pendamping dalam kelompok warna yang sama), ikut menyala saat semua atau salah satu target kelompok `n` itu diwarnai
+  // - jika elemen itu sendiri punya target yang sudah painted -> warnai sesuai nomor acak kelompoknya
+  // - jika elemen punya `n` tanpa `at` (elemen pendamping dalam kelompok warna yang sama), ikut menyala saat target kelompok `n` itu diwarnai
   const partFills: Record<number, string> = {};
   const groupPainted: Record<number, boolean> = {};
   targets.forEach((t, tIdx) => {
     if (painted[tIdx]) {
-      partFills[t.elIdx] = colors[t.el.n! - 1];
+      const num = groupNumbers[t.el.n! - 1];
+      partFills[t.elIdx] = colors[num - 1];
       groupPainted[t.el.n!] = true;
     }
   });
   els.forEach((el, elIdx) => {
     if (el.n && !el.at && groupPainted[el.n]) {
-      partFills[elIdx] = colors[el.n - 1];
+      const num = groupNumbers[el.n - 1];
+      partFills[elIdx] = colors[num - 1];
     }
   });
 
@@ -188,6 +193,7 @@ function BigShapeBoard({
         if (painted[tIdx]) return null;
         const [ax, ay] = t.el.at!;
         const isWrong = wrong === tIdx;
+        const num = groupNumbers[t.el.n! - 1];
         return (
           <Pressable
             key={tIdx}
@@ -203,7 +209,7 @@ function BigShapeBoard({
             ]}
           >
             <Text style={[styles.badgeText, { fontSize: badge * 0.68 }, isWrong && styles.badgeWrong]}>
-              {isWrong ? '✕' : t.el.n}
+              {isWrong ? '✕' : num}
             </Text>
           </Pressable>
         );

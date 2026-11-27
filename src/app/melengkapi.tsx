@@ -59,14 +59,23 @@ const SYMMETRIC_SHAPES: ShapeKind[] = [
   'jam',
 ];
 
+type RefSide = 'left' | 'right' | 'top' | 'bottom';
+const REF_SIDES: readonly RefSide[] = ['left', 'right', 'top', 'bottom'];
+
 function randomPick(previous?: ShapeKind): ShapeKind {
   const options = previous ? SYMMETRIC_SHAPES.filter((k) => k !== previous) : SYMMETRIC_SHAPES;
   return options[Math.floor(Math.random() * options.length)];
 }
 
-const GRID_CELLS = 8; // 8x8 kotak bantu (4 kiri, 4 kanan)
+function randomSide(previous?: RefSide): RefSide {
+  const options = previous ? REF_SIDES.filter((s) => s !== previous) : REF_SIDES;
+  return options[Math.floor(Math.random() * options.length)];
+}
 
-function halfPage(kind: ShapeKind): CustomPage {
+const GRID_CELLS = 8; // 8x8 kotak bantu (4x8 atau 8x4)
+
+function halfPage(kind: ShapeKind, side: RefSide): CustomPage {
+  const isVerticalSplit = side === 'left' || side === 'right';
   return {
     ratio: 1,
     render: (w) => {
@@ -76,13 +85,25 @@ function halfPage(kind: ShapeKind): CustomPage {
       const artSize = box * 0.88;
       const artOffset = (box - artSize) / 2;
 
+      const clipStyle =
+        side === 'left'
+          ? { left: pad + artOffset, top: pad + artOffset, width: artSize / 2, height: artSize }
+          : side === 'right'
+            ? { left: pad + artOffset + artSize / 2, top: pad + artOffset, width: artSize / 2, height: artSize }
+            : side === 'top'
+              ? { left: pad + artOffset, top: pad + artOffset, width: artSize, height: artSize / 2 }
+              : { left: pad + artOffset, top: pad + artOffset + artSize / 2, width: artSize, height: artSize / 2 };
+
+      const innerOffset =
+        side === 'right' ? { marginLeft: -artSize / 2 } : side === 'bottom' ? { marginTop: -artSize / 2 } : undefined;
+
       return (
         <View style={{ flex: 1 }}>
-          {/* Grid kotak bantu + garis sumbu simetri tengah */}
+          {/* Grid kotak bantu + garis batas tengah (vertikal untuk kiri/kanan, horizontal untuk atas/bawah) */}
           <Svg width={w} height={w} pointerEvents="none">
             {Array.from({ length: GRID_CELLS - 1 }, (_, i) => {
               const p = pad + (i + 1) * cell;
-              const isCenter = i + 1 === GRID_CELLS / 2;
+              const isCenter = isVerticalSplit && i + 1 === GRID_CELLS / 2;
               return (
                 <Line
                   key={`v${i}`}
@@ -98,24 +119,28 @@ function halfPage(kind: ShapeKind): CustomPage {
             })}
             {Array.from({ length: GRID_CELLS - 1 }, (_, i) => {
               const p = pad + (i + 1) * cell;
-              return <Line key={`h${i}`} x1={pad} y1={p} x2={pad + box} y2={p} stroke="#E0E0E0" strokeWidth={1} />;
+              const isCenter = !isVerticalSplit && i + 1 === GRID_CELLS / 2;
+              return (
+                <Line
+                  key={`h${i}`}
+                  x1={pad}
+                  y1={p}
+                  x2={pad + box}
+                  y2={p}
+                  stroke={isCenter ? '#78909C' : '#E0E0E0'}
+                  strokeWidth={isCenter ? 2 : 1}
+                  strokeDasharray={isCenter ? '6 4' : undefined}
+                />
+              );
             })}
             <Rect x={pad} y={pad} width={box} height={box} fill="none" stroke="#546E7A" strokeWidth={2.5} rx={4} />
           </Svg>
 
-          {/* Separuh kiri gambar (dipotong tepat di garis tengah x = w / 2) */}
-          <View
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              left: pad + artOffset,
-              top: pad + artOffset,
-              width: artSize / 2,
-              height: artSize,
-              overflow: 'hidden',
-            }}
-          >
-            <Shape kind={kind} size={artSize} lineOnly />
+          {/* Separuh gambar referensi (kiri / kanan / atas / bawah) */}
+          <View pointerEvents="none" style={[{ position: 'absolute', overflow: 'hidden' }, clipStyle]}>
+            <View style={innerOffset}>
+              <Shape kind={kind} size={artSize} lineOnly />
+            </View>
           </View>
         </View>
       );
@@ -123,17 +148,17 @@ function halfPage(kind: ShapeKind): CustomPage {
   };
 }
 
-/** Melengkapi gambar: separuh kiri shape tampil di atas grid kotak bantu, anak menggambar separuh kanannya (+ contoh utuh di pojok kanan atas). */
+/** Melengkapi gambar: separuh shape (kiri/kanan/atas/bawah acak) tampil di atas grid kotak bantu, anak menggambar separuh sisanya (+ contoh utuh di bar atas). */
 export default function MelengkapiScreen() {
   const cat = getCategory('melengkapi')!;
-  const [state, setState] = useState(() => ({ id: 0, pick: randomPick() }));
-  const shuffle = () => setState((s) => ({ id: s.id + 1, pick: randomPick(s.pick) }));
+  const [state, setState] = useState(() => ({ id: 0, pick: randomPick(), side: randomSide() }));
+  const shuffle = () => setState((s) => ({ id: s.id + 1, pick: randomPick(s.pick), side: randomSide(s.side) }));
 
   return (
     <GameScreen cat={cat} shuffleLabel="Acak Gambar Baru" onShuffle={shuffle}>
       <DrawingSheet
         key={state.id}
-        page={halfPage(state.pick)}
+        page={halfPage(state.pick, state.side)}
         preview={<Shape kind={state.pick} size={60} />}
         startColor="#212121"
         color={cat.color}

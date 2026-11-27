@@ -109,22 +109,38 @@ export function DrawingSheet({
                 <Shape kind={shape} size={box.w * 0.84} lineOnly />
               </View>
             ) : null}
-            <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
+            <View
+              style={[StyleSheet.absoluteFill, shape && styles.coloringLayer]}
+              needsOffscreenAlphaCompositing={Boolean(shape)}
+              {...pan.panHandlers}
+            >
               {/* pointerEvents none: sentuhan selalu jatuh ke View induk, jadi locationX/Y konsisten */}
               <Svg width={box.w} height={box.h} pointerEvents="none">
                 {strokes.map((s, i) => (
-                  <Path key={i} d={s.d} stroke={s.color} strokeWidth={s.width} strokeOpacity={0.85} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <Path
+                    key={i}
+                    d={s.d}
+                    stroke={s.color}
+                    strokeWidth={s.width}
+                    strokeOpacity={shape ? 1 : 0.85}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
                 ))}
                 {current && (
-                  <Path d={current} stroke={crayon} strokeWidth={size} strokeOpacity={0.85} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <Path
+                    d={current}
+                    stroke={crayon}
+                    strokeWidth={size}
+                    strokeOpacity={shape ? 1 : 0.85}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
                 )}
               </Svg>
             </View>
-            {shape && (
-              <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
-                <Shape kind={shape} size={box.w * 0.84} strokeOnly />
-              </View>
-            )}
           </View>
         )}
       </View>
@@ -169,6 +185,7 @@ const styles = StyleSheet.create({
   wrap: { flex: 1 },
   stage: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  coloringLayer: { opacity: 0.78 },
   paper: {
     backgroundColor: '#fff',
     borderRadius: 6,

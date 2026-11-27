@@ -15,6 +15,8 @@ export type CodeRound = {
       /** 1 shape besar dengan beberapa bagian bernomor (multi-warna). */
       type: 'bigShape';
       kind: ShapeKind;
+      /** Pemetaan acak dari ID kelompok (`el.n`, 1-based) ke angka tampilan (1..k). */
+      groupNumbers: number[];
     }
 );
 
@@ -22,7 +24,7 @@ export type CodeRound = {
 export function roundNumbers(round: CodeRound): number[] {
   if (round.type === 'shapes') return round.items.map((it) => it.number);
   const els = shapeDef(round.kind).els ?? [];
-  return els.filter((e) => e.n && e.at).map((e) => e.n!);
+  return els.filter((e) => e.n && e.at).map((e) => round.groupNumbers[e.n! - 1]);
 }
 
 /**
@@ -73,8 +75,10 @@ export function randomCodeRound(previous?: CodeRound): CodeRound {
   if (Math.random() < 0.5) {
     const last = previous?.type === 'bigShape' ? previous.kind : undefined;
     const kind = shuffle(MULTI_CODE_KINDS.filter((k) => k !== last))[0];
-    const colors = pickDistinctColors(shapeGroupCount(kind));
-    return { type: 'bigShape', kind, colors };
+    const count = shapeGroupCount(kind);
+    const colors = pickDistinctColors(count);
+    const groupNumbers = shuffle(Array.from({ length: count }, (_, i) => i + 1));
+    return { type: 'bigShape', kind, colors, groupNumbers };
   }
   const k = Math.random() < 0.5 ? 3 : 4;
   const colors = pickDistinctColors(k);
